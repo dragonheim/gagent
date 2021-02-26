@@ -27,6 +27,9 @@ var exitCodes = struct {
 	"SETUP_FAILED":        2,
 	"INVALID_MODE":        3,
 	"AGENT_LOAD_FAILED":   4,
+	"AGENT_MISSING_TAGS":  5,
+	"NO_ROUTERS_DEFINED":  6,
+	"NO_WORKERS_DEFINED":  6,
 }}
 
 func main() {
