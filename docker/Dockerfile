@@ -8,7 +8,9 @@ RUN apk add --no-cache zeromq-dev build-base git && \
 
 
 FROM alpine:3.12
-LABEL Name="G'Agent" Maintainer="jwells@dragonheim.net" License="MIT License"
+LABEL Name="G'Agent"
+LABEL Maintainer="jwells@dragonheim.net"
+LABEL License="MIT License"
 RUN apk add --no-cache zeromq; mkdir -p -m 0700 /etc/gagent
  
 COPY --from=builder /gagent/examples/example_gagent.hcl /etc/gagent/gagent.hcl
