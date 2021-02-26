@@ -13,7 +13,7 @@ import (
 
 	//	client "git.dragonheim.net/dragonheim/gagent/src/client"
 	gr "git.dragonheim.net/dragonheim/gagent/src/router"
-	//	worker "git.dragonheim.net/dragonheim/gagent/src/worker"
+	gw "git.dragonheim.net/dragonheim/gagent/src/worker"
 
 	docopt "github.com/aviddiviner/docopt-go"
 	hclsimple "github.com/hashicorp/hcl/v2/hclsimple"
@@ -30,7 +30,6 @@ var exitCodes = struct {
 	"AGENT_LOAD_FAILED":   4,
 	"AGENT_MISSING_TAGS":  5,
 	"NO_ROUTERS_DEFINED":  6,
-	"NO_WORKERS_DEFINED":  6,
 	"NO_WORKERS_DEFINED":  7,
 }}
 
@@ -149,6 +148,12 @@ func main() {
 		log.Printf("Arguments are %v\n", arguments)
 		log.Printf("Configuration is %v\n", config)
 		log.Printf("Running in router mode\n")
+
+		if len(config.Workers) == 0 {
+			log.Printf("No workers defined.\n")
+			os.Exit(exitCodes.m["NO_WORKERS_DEFINED"])
+		}
+
 		go gr.Main(config)
 		select {}
 
@@ -161,8 +166,15 @@ func main() {
 		 */
 		log.Printf("Arguments are %v\n", arguments)
 		log.Printf("Configuration is %v\n", config)
-		// go worker.Main(config)
-		// select {}
+		log.Printf("Running in worker mode\n")
+
+		if len(config.Routers) == 0 {
+			log.Printf("No routers defined.\n")
+			os.Exit(exitCodes.m["NO_ROUTERS_DEFINED"])
+		}
+
+		go gw.Main(config)
+		select {}
 
 	case "setup":
 		log.Printf("Running in setup mode\n")
