@@ -1,0 +1,44 @@
+---
+kind: pipeline
+type: docker
+name: default
+
+platform:
+  os: linux
+  arch: arm
+
+trigger:
+  branch:
+    include:
+      - development
+    exclude:
+      - main
+
+clone:
+  depth: 1
+
+volumes:
+  - name: dockersock
+    host:
+      path: /run/docker.sock
+
+image_pull_secrets:
+  - docker
+
+steps:
+  - name: Build ${DRONE_REPO} Container Image
+    image: plugins/docker
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
+    settings:
+      auth:
+        from_secret: Docker
+      auto_tag: true
+      dockerfile: docker/Dockerfile
+      # mirror: "https://registry.dragonheim.net:443"
+      username:
+        from_secret: docker_username
+      repo: ${DRONE_REPO}
+      # target: development
+
