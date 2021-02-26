@@ -5,8 +5,8 @@ type GagentConfig struct {
 	Name       string           `hcl:"name,optional"`
 	Mode       string           `hcl:"mode,attr"`
 	UUID       string           `hcl:"uuid,optional"`
-	ListenAddr string           `hc:"listenaddr,optional"`
-	ListenPort int              `hc:"listenport,optional"`
+	ListenAddr string           `hcl:"address,optional"`
+	ListenPort int              `hcl:"port,optional"`
 	Clients    []*ClientDetails `hcl:"client,block"`
 	Routers    []*RouterDetails `hcl:"router,block"`
 	Workers    []*WorkerDetails `hcl:"worker,block"`
