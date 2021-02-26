@@ -27,6 +27,8 @@ func pop(msg []string) (head, tail []string) {
 func Main(config gs.GagentConfig) {
 	//  Frontend socket talks to clients over TCP
 	frontend, _ := zmq.NewSocket(zmq.ROUTER)
+	fmt.Printf("Running in worker mode\n")
+
 	defer frontend.Close()
 	connectString := fmt.Sprintf("tcp://%s", config.Routers[0].RouterAddr)
 	frontend.Bind(connectString)

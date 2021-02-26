@@ -1,17 +1,18 @@
 package main
 
 import (
-	"fmt"
+	//	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 
 	//	"math/rand"
-	//	"time"
+	"time"
 
 	gs "git.dragonheim.net/dragonheim/gagent/src/gstructs"
 
 	//	client "git.dragonheim.net/dragonheim/gagent/src/client"
-	//	router "git.dragonheim.net/dragonheim/gagent/src/router"
+	gr "git.dragonheim.net/dragonheim/gagent/src/router"
 	//	worker "git.dragonheim.net/dragonheim/gagent/src/worker"
 
 	docopt "github.com/aviddiviner/docopt-go"
@@ -30,6 +31,7 @@ var exitCodes = struct {
 	"AGENT_MISSING_TAGS":  5,
 	"NO_ROUTERS_DEFINED":  6,
 	"NO_WORKERS_DEFINED":  6,
+	"NO_WORKERS_DEFINED":  7,
 }}
 
 func main() {
@@ -93,7 +95,6 @@ func main() {
 	 * dictionary of the command line arguments.
 	 */
 	arguments, _ := docopt.ParseDoc(usage)
-	fmt.Printf("Arguments are %v\n", arguments)
 
 	if arguments["--config"] != nil {
 		configFile = arguments["--config"].(string)
@@ -107,13 +108,11 @@ func main() {
 	} else {
 		err := hclsimple.DecodeFile(configFile, nil, &config)
 		if err != nil {
-			fmt.Printf("Failed to load configuration file: %s.\n", configFile)
-			fmt.Println(err)
+			log.Printf("Failed to load configuration file: %s.\n", configFile)
+			log.Printf("%s\n",err)
 			os.Exit(exitCodes.m["CONFIG_FILE_MISSING"])
 		}
 	}
-
-	fmt.Printf("Configuration is %v\n", config)
 
 	switch config.Mode {
 	case "client":
@@ -124,16 +123,18 @@ func main() {
 		 * will contact the router and attempt to retrieve the results
 		 * of it's most recent request.
 		 */
-		fmt.Printf("Running in client mode\n")
+		log.Printf("Arguments are %v\n", arguments)
+		log.Printf("Configuration is %v\n", config)
+		log.Printf("Running in client mode\n")
 		agent, err := ioutil.ReadFile(arguments["--agent"].(string))
 		if err == nil {
-			fmt.Printf("Agent containts %v\n", string(agent))
-			// fmt.Printf("Forking...\n")
-			// go client.Main(config.Client, string(agent))
-			// fmt.Printf("Forked thread has completed\n")
-			// time.Sleep(10 * time.Second)
+			log.Printf("Agent containts %v\n", string(agent))
+			log.Printf("Forking...\n")
+			// go client.Main(config, string(agent))
+			log.Printf("Forked thread has completed\n")
+			time.Sleep(10 * time.Second)
 		} else {
-			fmt.Printf("Failed to load Agent file: %s.\n", arguments["--agent"].(string))
+			log.Printf("Failed to load Agent file: %s.\n", arguments["--agent"].(string))
 			os.Exit(exitCodes.m["AGENT_LOAD_FAILED"])
 		}
 
@@ -145,9 +146,11 @@ func main() {
 		 * or client node. Tags are used by the agent to give hints as to where
 		 * it should be routed.
 		 */
-		fmt.Printf("Running in router mode\n")
-		// go router.Main(config.Router)
-		// select {}
+		log.Printf("Arguments are %v\n", arguments)
+		log.Printf("Configuration is %v\n", config)
+		log.Printf("Running in router mode\n")
+		go gr.Main(config)
+		select {}
 
 	case "worker":
 		/*
@@ -156,16 +159,17 @@ func main() {
 		 * router(s) they are connected. The worker will execute the agent code and
 		 * pass the agent and it's results to a router.
 		 */
-		fmt.Printf("Running in worker mode\n")
-		// go worker.Main(config.Worker)
+		log.Printf("Arguments are %v\n", arguments)
+		log.Printf("Configuration is %v\n", config)
+		// go worker.Main(config)
 		// select {}
 
 	case "setup":
-		fmt.Printf("Running in setup mode\n")
+		log.Printf("Running in setup mode\n")
 		os.Exit(exitCodes.m["SETUP_FAILED"])
 
 	default:
-		fmt.Printf("Unknown operating mode, exiting.\n")
+		log.Printf("Unknown operating mode, exiting.\n")
 		os.Exit(exitCodes.m["INVALID_MODE"])
 	}
 
