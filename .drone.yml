@@ -9,10 +9,6 @@ platform:
 
 trigger:
   branch:
-    include:
-      - issues/1
-      - issues/3
-      - issues/4
     exclude:
       - main
 
