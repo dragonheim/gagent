@@ -5,12 +5,10 @@ name: default
 
 platform:
   os: linux
-  arch: arm
+  arch: amd64
 
 trigger:
   branch:
-    include:
-      - issues/1
     exclude:
       - main
 

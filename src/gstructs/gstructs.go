@@ -5,8 +5,8 @@ type GagentConfig struct {
 	Name       string           `hcl:"name,optional"`
 	Mode       string           `hcl:"mode,attr"`
 	UUID       string           `hcl:"uuid,optional"`
-	ListenAddr string           `hcl:"address,optional"`
-	ListenPort int              `hcl:"port,optional"`
+	ListenAddr string           `hcl:"listenaddr,optional"`
+	ListenPort int              `hcl:"listenport,optional"`
 	Clients    []*ClientDetails `hcl:"client,block"`
 	Routers    []*RouterDetails `hcl:"router,block"`
 	Workers    []*WorkerDetails `hcl:"worker,block"`
@@ -43,7 +43,7 @@ type RouterDetails struct {
 	 * which MQ router to send the agent's requests to.
 	 * This attempts to keep the routers unique globally.
 	 */
-	RouterID string `hcl:"routerid,attr"`
+	RouterID string `hcl:"uuid,attr"`
 
 	/*
 	 * This is the IP Address and port that the router
@@ -75,7 +75,7 @@ type WorkerDetails struct {
 	 * send agents to. This attempts to keep the
 	 * workers unique globally.
 	 */
-	WorkerID string `hcl:"workerid,attr"`
+	WorkerID string `hcl:"uuid,attr"`
 
 	/*
 	 * These tags will be passed to the router upon

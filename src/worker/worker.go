@@ -2,7 +2,7 @@ package worker
 
 import (
 	"fmt"
-	// "log"
+	"log"
 	"math/rand"
 	"time"
 
@@ -23,34 +23,8 @@ func pop(msg []string) (head, tail []string) {
 	return
 }
 
-// Main is the initiation function for a Worker
-func Main(config gs.GagentConfig) {
-	//  Frontend socket talks to clients over TCP
-	frontend, _ := zmq.NewSocket(zmq.ROUTER)
-	fmt.Printf("Running in worker mode\n")
-
-	defer frontend.Close()
-	connectString := fmt.Sprintf("tcp://%s", config.Routers[0].RouterAddr)
-	frontend.Bind(connectString)
-
-	//  Backend socket talks to workers over inproc
-	backend, _ := zmq.NewSocket(zmq.DEALER)
-	defer backend.Close()
-	backend.Bind("inproc://backend")
-
-	//  Launch pool of agent handlers
-	for i := 0; i < 5; i++ {
-		go agentHandler(i)
-	}
-
-	//  Connect backend to frontend via a proxy
-	// err := zmq.Proxy(frontend, backend, nil)
-	// log.Fatalln("Proxy interrupted:", err)
-}
-
 //  Each worker task works on one request at a time and sends a random number
 //  of replies back, with random delays between replies:
-
 func agentHandler(workerNum int) {
 	interp := picol.InitInterp()
 	interp.RegisterCoreCommands()
@@ -70,8 +44,35 @@ func agentHandler(workerNum int) {
 			//  Sleep for some fraction of a second
 			time.Sleep(time.Duration(rand.Intn(1000)+1) * time.Millisecond)
 
-			fmt.Println(fmt.Sprintf("Worker %d: %s", workerNum, identity))
+			log.Printf(fmt.Sprintf("Worker %d: %s\n", workerNum, identity))
 			worker.SendMessage(identity, content)
 		}
 	}
 }
+
+// Main is the initiation function for a Worker
+func Main(config gs.GagentConfig) {
+	//  Frontend socket talks to clients over TCP
+	frontend, _ := zmq.NewSocket(zmq.ROUTER)
+	log.Printf("Starting worker\n")
+
+	defer frontend.Close()
+	log.Printf("Attempting to connect to: %s(%s)\n", config.Routers[0].RouterName, config.Routers[0].RouterAddr)
+	connectString := fmt.Sprintf("tcp://%s", config.Routers[0].RouterAddr)
+	frontend.Bind(connectString)
+
+	//  Backend socket talks to workers over inproc
+	backend, _ := zmq.NewSocket(zmq.DEALER)
+	defer backend.Close()
+	backend.Bind("inproc://backend")
+
+	//  Launch pool of agent handlers
+	for i := 0; i < 5; i++ {
+		go agentHandler(i)
+	}
+
+	//  Connect backend to frontend via a proxy
+	// err := zmq.Proxy(frontend, backend, nil)
+	// log.Fatalln("Proxy interrupted:", err)
+}
+
