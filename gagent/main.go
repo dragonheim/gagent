@@ -11,7 +11,7 @@ import (
 
 	gs "git.dragonheim.net/dragonheim/gagent/src/gstructs"
 
-	//	client "git.dragonheim.net/dragonheim/gagent/src/client"
+	gc "git.dragonheim.net/dragonheim/gagent/src/client"
 	gr "git.dragonheim.net/dragonheim/gagent/src/router"
 	gw "git.dragonheim.net/dragonheim/gagent/src/worker"
 
@@ -132,9 +132,9 @@ func main() {
 		}
 		agent, err := ioutil.ReadFile(arguments["--agent"].(string))
 		if err == nil {
-			log.Printf("Agent containts %v\n", string(agent))
+			//			log.Printf("Agent containts %v\n", string(agent))
 			log.Printf("Forking...\n")
-			// go client.Main(config, string(agent))
+			go gc.Main(config, string(agent))
 			log.Printf("Forked thread has completed\n")
 			time.Sleep(10 * time.Second)
 		} else {

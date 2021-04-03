@@ -4,7 +4,6 @@ type: docker
 name: default
 
 platform:
-  os: linux
   arch: amd64
 
 # trigger:
@@ -21,7 +20,7 @@ volumes:
       path: /run/docker.sock
 
 steps:
-  - name: Build ${DRONE_REPO} Container Image
+  - name: Build ${DRONE_REPO} Container Image On amd64
     image: plugins/docker
     volumes:
       - name: dockersock
@@ -46,7 +45,61 @@ steps:
       api_key:
         from_secret: Datadog
       events:
-        - title: "Build failure"
+        - title: "Build failure on amd64"
+          text: "Build ${DRONE_BUILD_NUMBER}"
+          alert_type: "error"
+    when:
+      status:
+        - failure
+
+---
+kind: pipeline
+type: docker
+name: default
+
+platform:
+  arch: arm
+
+# trigger:
+#   branch:
+#     exclude:
+#       - main
+
+clone:
+  depth: 1
+
+volumes:
+  - name: dockersock
+    host:
+      path: /run/docker.sock
+
+steps:
+  - name: Build ${DRONE_REPO} Container Image On arm
+    image: plugins/docker
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
+    settings:
+      auto_tag: false
+      daemon_off: true
+      debug: false
+      dockerfile: docker/Dockerfile
+      mirror: "https://registry.dragonheim.net/"
+      purge: true
+      repo: ${DRONE_REPO}
+      # target: development
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_auth
+
+  - name: Send Status To Datadog
+    image: masci/drone-datadog
+    settings:
+      api_key:
+        from_secret: Datadog
+      events:
+        - title: "Build failure on arm"
           text: "Build ${DRONE_BUILD_NUMBER}"
           alert_type: "error"
     when:
