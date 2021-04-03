@@ -1,13 +1,12 @@
 package main
 
 import (
-	//	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
+	"time"
 
 	//	"math/rand"
-	"time"
 
 	gs "git.dragonheim.net/dragonheim/gagent/src/gstructs"
 
@@ -131,15 +130,14 @@ func main() {
 			os.Exit(exitCodes.m["AGENT_NOT_DEFINED"])
 		}
 		agent, err := ioutil.ReadFile(arguments["--agent"].(string))
-		if err == nil {
-			//			log.Printf("Agent containts %v\n", string(agent))
-			log.Printf("Forking...\n")
-			go gc.Main(config, string(agent))
-			log.Printf("Forked thread has completed\n")
-			time.Sleep(10 * time.Second)
-		} else {
+		if err != nil {
 			log.Printf("Failed to load Agent file: %s", arguments["--agent"])
 			os.Exit(exitCodes.m["AGENT_LOAD_FAILED"])
+		}
+		for key := range config.Routers {
+			log.Printf("Calling for router %d", key)
+			go gc.Main(config, key, string(agent))
+			time.Sleep(10 * time.Second)
 		}
 
 	case "router":

@@ -44,12 +44,12 @@ uuid = "7e9d13fe-5151-5876-66c0-20ca03e8fca4"
 
 /.
  * This is the port to listen on, it defaults to
- * 33570.  It is strongly recommended that you not
+ * 35570.  It is strongly recommended that you not
  * use ports 0 - 1024
  *
  * Optional.
  *
- * listenport = 33570
+ * listenport = 35570
  */
 
 /*

@@ -37,6 +37,7 @@ func agentRouter(workerNum int) {
 		//  The DEALER socket gives us the reply envelope and message
 		msg, _ := worker.RecvMessage(0)
 		identity, content := pop(msg)
+		log.Printf("Recieved message: %s", content)
 
 		//  Send 0..4 replies back
 		replies := rand.Intn(5)
@@ -50,7 +51,6 @@ func agentRouter(workerNum int) {
 		}
 	}
 }
-
 
 // Main is the initiation function for a Router
 func Main(config gs.GagentConfig) {
@@ -84,4 +84,3 @@ func Main(config gs.GagentConfig) {
 	err := zmq.Proxy(frontend, backend, nil)
 	log.Fatalln("Proxy interrupted:", err)
 }
-

@@ -46,11 +46,19 @@ type RouterDetails struct {
 	RouterID string `hcl:"uuid,attr"`
 
 	/*
-	 * This is the IP Address and port that the router
+	 * This is the IP address or hostname the router
 	 * will listen on.  The router will start up a 0MQ
 	 * service that clients and workers will connect to.
 	 */
 	RouterAddr string `hcl:"address,attr"`
+
+	/*
+	 * This is the is the port that the router listens
+	 * on.  If not defined, it will default to 35570
+	 * The router will start up a 0MQ service that
+	 * clients and workers will connect to.
+	 */
+	RouterPort string `hcl:"port,optional"`
 
 	/*
 	 * These tags will be passed to the router upon
