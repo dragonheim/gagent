@@ -1,6 +1,10 @@
-#!/usr/bin/env tcl
-#
-#
+#####################
+### Add 2 numbers ###
+#####################
+# HINT START
+#  - math
+#  - addition
+# HINT END
 set val1 1
 set val2 2
 

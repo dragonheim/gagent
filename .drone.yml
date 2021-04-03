@@ -7,10 +7,10 @@ platform:
   os: linux
   arch: amd64
 
-trigger:
-  branch:
-    exclude:
-      - main
+# trigger:
+#   branch:
+#     exclude:
+#       - main
 
 clone:
   depth: 1
@@ -39,3 +39,16 @@ steps:
         from_secret: docker_username
       password:
         from_secret: docker_auth
+
+  - name: Send Status To Datadog
+    image: masci/drone-datadog
+    settings:
+      api_key:
+        from_secret: Datadog
+      events:
+        - title: "Build failure"
+          text: "Build ${DRONE_BUILD_NUMBER}"
+          alert_type: "error"
+    when:
+      status:
+        - failure

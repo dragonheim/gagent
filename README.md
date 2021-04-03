@@ -10,18 +10,18 @@ Imagine, for a moment, that you are on Mars and need to perform a search for dat
 
 ## Example Agent
 ```tcl
-1 : ###################
-2 : ### Hello Earth ###
-3 : ###################
-4 : # HINT START
-5 : #  - console
-6 : #  - gravity measurements
-7 : #  - gravity fluctuations
-8 : # HINT END
-9 : function hello_world() {
-10:   console.log("Hello Earth, does tempurature various alter specific gravity?")
-11: }
-12: console.log(hello_world())
+1  : ###################
+2  : ### Hello Earth ###
+3  : ###################
+4  : # HINT START
+5  : #  - console
+6  : #  - gravity measurements
+7  : #  - gravity fluctuations
+8  : # HINT END
+9  : proc hello_earth {} {
+10 :   puts "Hello Earth, does tempurature variations alter specific gravity?"
+11 : }
+12 : hello_earth
 ```
 Lines 1 - 3 are simple comments
 
@@ -29,9 +29,9 @@ Line  4 Tells the G'Agent router that this is the start of the hints to route fo
 
 Lines 5 - 7 are a list of hints that the router will use to determine which router(s) may have domain specific information.
 
-Lines 9 - 11 are a tcl function that will be executed on the worker before sending the results back to the client.
+Lines 9 - 11 are a tcl procedure that will be executed on the worker before sending the results back to the client.
 
-Line  12 executes the function defined above.
+Line  12 executes the procedure defined above.
 
 ## History
 More information can be found in the original [documentation](http://www.cs.dartmouth.edu/~dfk/agents/pub/agents/doc.5.1.ps.gz), and in the project's [wiki](https://git.dragonheim.net/dragonheim/gagent/wiki/_pages).
