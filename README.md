@@ -25,9 +25,11 @@ Imagine, for a moment, that you are on Mars and need to perform a search for dat
 ```
 Lines 1 - 3 are simple comments
 
-Line  4 Tells the G'Agent router that this is the start of the hints to route for.
+Line  4 indicates the start of the hints.
 
 Lines 5 - 7 are a list of hints that the router will use to determine which router(s) may have domain specific information.
+
+Line  8 indicates the end of the hints.
 
 Lines 9 - 11 are a tcl procedure that will be executed on the worker before sending the results back to the client.
 

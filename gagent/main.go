@@ -1,17 +1,16 @@
 package main
 
 import (
-	//	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
+	"time"
 
 	//	"math/rand"
-	"time"
 
 	gs "git.dragonheim.net/dragonheim/gagent/src/gstructs"
 
-	//	client "git.dragonheim.net/dragonheim/gagent/src/client"
+	gc "git.dragonheim.net/dragonheim/gagent/src/client"
 	gr "git.dragonheim.net/dragonheim/gagent/src/router"
 	gw "git.dragonheim.net/dragonheim/gagent/src/worker"
 
@@ -31,6 +30,7 @@ var exitCodes = struct {
 	"AGENT_MISSING_TAGS":  5,
 	"NO_ROUTERS_DEFINED":  6,
 	"NO_WORKERS_DEFINED":  7,
+	"AGENT_NOT_DEFINED":   8,
 }}
 
 func main() {
@@ -108,7 +108,7 @@ func main() {
 		err := hclsimple.DecodeFile(configFile, nil, &config)
 		if err != nil {
 			log.Printf("Failed to load configuration file: %s.\n", configFile)
-			log.Printf("%s\n",err)
+			log.Printf("%s\n", err)
 			os.Exit(exitCodes.m["CONFIG_FILE_MISSING"])
 		}
 	}
@@ -125,16 +125,19 @@ func main() {
 		log.Printf("Arguments are %v\n", arguments)
 		log.Printf("Configuration is %v\n", config)
 		log.Printf("Running in client mode\n")
+		if arguments["--agent"] == nil {
+			log.Printf("Agent file not specified")
+			os.Exit(exitCodes.m["AGENT_NOT_DEFINED"])
+		}
 		agent, err := ioutil.ReadFile(arguments["--agent"].(string))
-		if err == nil {
-			log.Printf("Agent containts %v\n", string(agent))
-			log.Printf("Forking...\n")
-			// go client.Main(config, string(agent))
-			log.Printf("Forked thread has completed\n")
-			time.Sleep(10 * time.Second)
-		} else {
-			log.Printf("Failed to load Agent file: %s.\n", arguments["--agent"].(string))
+		if err != nil {
+			log.Printf("Failed to load Agent file: %s", arguments["--agent"])
 			os.Exit(exitCodes.m["AGENT_LOAD_FAILED"])
+		}
+		for key := range config.Routers {
+			log.Printf("Calling for router %d", key)
+			go gc.Main(config, key, string(agent))
+			time.Sleep(10 * time.Second)
 		}
 
 	case "router":

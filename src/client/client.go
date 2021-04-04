@@ -2,6 +2,8 @@ package client
 
 import (
 	"fmt"
+	"log"
+	"strconv"
 	"sync"
 	"time"
 
@@ -11,13 +13,19 @@ import (
 )
 
 // Main is the initiation function for a Client
-func Main(config gs.GagentConfig, agent string) {
+func Main(config gs.GagentConfig, routerID int, agent string) {
 	var mu sync.Mutex
+	var rport = int(config.ListenPort)
+	if config.Routers[routerID].RouterPort != "" {
+		rport, _ = strconv.Atoi(config.Routers[routerID].RouterPort)
+	}
 
-	fmt.Printf("Did we make it this far?\n")
-	fmt.Printf("--|%#v|--\n", agent)
+	log.Printf("--|%#v|--\n", agent)
 
-	connectString := fmt.Sprintf("tcp://%s", config.Routers[0].RouterAddr)
+	connectString := fmt.Sprintf("tcp://%s:%d",
+		config.Routers[routerID].RouterAddr,
+		rport)
+	log.Printf("Attempting to connect to %s\n", connectString)
 
 	sock, _ := zmq.NewSocket(zmq.DEALER)
 	defer sock.Close()
@@ -36,7 +44,7 @@ func Main(config gs.GagentConfig, agent string) {
 		mu.Lock()
 		msg, err := sock.RecvMessage(zmq.DONTWAIT)
 		if err == nil {
-			fmt.Println(msg[0], config.UUID)
+			log.Println(msg[0], config.UUID)
 		}
 		mu.Unlock()
 	}
