@@ -30,7 +30,10 @@ steps:
       daemon_off: true
       debug: false
       dockerfile: docker/Dockerfile
+      dry_run: true
+      experimental: true
       mirror: "https://registry.dragonheim.net/"
+      pull_image: false
       purge: true
       repo: ${DRONE_REPO}
       # target: development
@@ -84,7 +87,10 @@ steps:
       daemon_off: true
       debug: false
       dockerfile: docker/Dockerfile
+      dry_run: true
+      experimental: true
       mirror: "https://registry.dragonheim.net/"
+      pull_image: false
       purge: true
       repo: ${DRONE_REPO}
       # target: development
