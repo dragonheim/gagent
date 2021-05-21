@@ -25,6 +25,9 @@ steps:
     volumes:
       - name: dockersock
         path: /var/run/docker.sock
+    environment:
+      GOOS: linux
+      GOARCH: amd64
     settings:
       auto_tag: false
       daemon_off: true
@@ -82,6 +85,9 @@ steps:
     volumes:
       - name: dockersock
         path: /var/run/docker.sock
+    environment:
+      GOOS: linux
+      GOARCH: arm
     settings:
       auto_tag: false
       daemon_off: true

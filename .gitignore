@@ -40,8 +40,6 @@ debug
 *.log
 *.pid
 
-# Ignore G'Agent configuration file.
-gagent.hcl
-
 # Ignore various Drone CI support files
 .drone.secrets
+

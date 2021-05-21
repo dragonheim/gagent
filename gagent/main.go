@@ -6,8 +6,6 @@ import (
 	"os"
 	"time"
 
-	//	"math/rand"
-
 	gs "git.dragonheim.net/dragonheim/gagent/src/gstructs"
 
 	gc "git.dragonheim.net/dragonheim/gagent/src/client"
@@ -16,8 +14,13 @@ import (
 
 	docopt "github.com/aviddiviner/docopt-go"
 	hclsimple "github.com/hashicorp/hcl/v2/hclsimple"
+	"github.com/hashicorp/hcl/v2/hclwrite"
+	"github.com/hashicorp/logutils"
 	uuid "github.com/nu7hatch/gouuid"
+	"github.com/zclconf/go-cty/cty"
 )
+
+const VERSION = "0.0.1"
 
 var exitCodes = struct {
 	m map[string]int
@@ -34,17 +37,24 @@ var exitCodes = struct {
 }}
 
 func main() {
+	filter := &logutils.LevelFilter{
+		Levels:   []logutils.LogLevel{"DEBUG", "INFO", "WARN", "ERROR"},
+		MinLevel: logutils.LogLevel("WARN"),
+		Writer:   os.Stderr,
+	}
+	log.SetOutput(filter)
+
 	var config gs.GagentConfig
 	var configFile string = "/etc/gagent/gagent.hcl"
 
 	config.Name, _ = os.Hostname()
+	config.Mode = "setup"
 
 	/*
 	 * Set a default UUID for this node.
 	 * This is used throughout the G'Agent system to uniquely identify this node.
 	 * It can be overriden in the configuration file by setting uuid
 	 */
-	// rand.Seed(time.Now().UnixNano())
 	identity, _ := uuid.NewV5(uuid.NamespaceURL, []byte("gagent"+config.Name))
 	config.UUID = identity.String()
 
@@ -55,11 +65,25 @@ func main() {
 	config.ListenAddr = "0.0.0.0"
 
 	/*
-	 * By default, G'Agent will use port 35570 to communicate with the routers,
-	 * but you can override it by setting the listenport in the configuration
-	 * file
+	 * By default, G'Agent client will use port 35571 to communicate with the
+	 * routers, but you can override it by setting the clientport in the
+	 * configuration file
 	 */
-	config.ListenPort = 35570
+	config.ClientPort = 35571
+
+	/*
+	 * By default, G'Agent router will use port 35572 to communicate with
+	 * other routers, but you can override it by setting the routerport in
+	 * the configuration file
+	 */
+	config.RouterPort = 35570
+
+	/*
+	 * By default, G'Agent worker will use port 35570 to communicate with the
+	 * routers, but you can override it by setting the workerport in the
+	 * configuration file
+	 */
+	config.WorkerPort = 35572
 
 	/*
 	 * Create a usage variable and then use that to declare the arguments and
@@ -74,44 +98,60 @@ func main() {
 	usage += "\n"
 
 	usage += "Usage: \n"
-	usage += "  gagent [--config=<config>] [--agent=<file>] \n"
+	usage += "  gagent client [--config=<config>] [--agent=<file>] \n"
+	usage += "  gagent router [--config=<config>] \n"
+	usage += "  gagent worker [--config=<config>] \n"
 	usage += "  gagent setup [--config=<config>] \n"
+	usage += "  gagent --version \n"
 	usage += "\n"
 
 	usage += "Arguments: \n"
-	usage += "  client -- Start as a G'Agent client \n"
-	usage += "  <file> -- filename of the agent to be uploaded to the G'Agent network \n"
-	usage += "\n"
-
-	usage += "  setup  -- Write inital configuration file \n"
+	usage += "  client   -- Start as a G'Agent client \n"
+	usage += "  router   -- Start as a G'Agent router \n"
+	usage += "  worker   -- Start as a G'Agent worker \n"
+	usage += "  setup    -- Write inital configuration file \n"
 	usage += "\n"
 
 	usage += "Options:\n"
-	usage += "  config=<config> [default: /etc/gagent/gagent.hcl] \n"
+	usage += "  -h --help         -- Show this help screen \n"
+	usage += "  --version         -- Show version \n"
+	usage += "  --config=<config> -- [default: /etc/gagent/gagent.hcl] \n"
+	usage += "  --agent=<file>    -- filename of the agent to be uploaded to the G'Agent network \n"
 
 	/*
 	 * Consume the usage variable and the command line arguments to create a
-	 * dictionary of the command line arguments.
+	 * dictionary / map.
 	 */
-	arguments, _ := docopt.ParseDoc(usage)
+	opts, _ := docopt.ParseArgs(usage, nil, VERSION)
+	log.Printf("[DEBUG] Arguments are %v\n", opts)
 
-	if arguments["--config"] != nil {
-		configFile = arguments["--config"].(string)
+	if opts["--config"] != nil {
+		configFile = opts["--config"].(string)
 	}
 
 	/*
 	 * Let the command line mode override the configuration.
 	 */
-	if arguments["setup"] == true {
+	if opts["setup"] == true {
 		config.Mode = "setup"
 	} else {
 		err := hclsimple.DecodeFile(configFile, nil, &config)
 		if err != nil {
-			log.Printf("Failed to load configuration file: %s.\n", configFile)
-			log.Printf("%s\n", err)
+			log.Printf("[ERROR] Failed to load configuration file: %s.\n", configFile)
+			log.Printf("[ERROR] %s\n", err)
 			os.Exit(exitCodes.m["CONFIG_FILE_MISSING"])
 		}
+		if opts["client"] == true {
+			config.Mode = "client"
+		}
+		if opts["router"] == true {
+			config.Mode = "router"
+		}
+		if opts["worker"] == true {
+			config.Mode = "worker"
+		}
 	}
+	log.Printf("[DEBUG] Configuration is %v\n", config)
 
 	switch config.Mode {
 	case "client":
@@ -122,20 +162,23 @@ func main() {
 		 * will contact the router and attempt to retrieve the results
 		 * of it's most recent request.
 		 */
-		log.Printf("Arguments are %v\n", arguments)
-		log.Printf("Configuration is %v\n", config)
-		log.Printf("Running in client mode\n")
-		if arguments["--agent"] == nil {
-			log.Printf("Agent file not specified")
+		log.Printf("[INFO] Running in client mode\n")
+
+		if len(config.Routers) == 0 {
+			log.Printf("[ERROR] No routers defined.\n")
+			os.Exit(exitCodes.m["NO_ROUTERS_DEFINED"])
+		}
+
+		if opts["--agent"] == nil {
+			log.Printf("[ERROR] Agent file not specified")
 			os.Exit(exitCodes.m["AGENT_NOT_DEFINED"])
 		}
-		agent, err := ioutil.ReadFile(arguments["--agent"].(string))
+		agent, err := ioutil.ReadFile(opts["--agent"].(string))
 		if err != nil {
-			log.Printf("Failed to load Agent file: %s", arguments["--agent"])
+			log.Printf("[ERROR] Failed to load Agent file: %s", opts["--agent"])
 			os.Exit(exitCodes.m["AGENT_LOAD_FAILED"])
 		}
 		for key := range config.Routers {
-			log.Printf("Calling for router %d", key)
 			go gc.Main(config, key, string(agent))
 			time.Sleep(10 * time.Second)
 		}
@@ -148,12 +191,10 @@ func main() {
 		 * or client node. Tags are used by the agent to give hints as to where
 		 * it should be routed.
 		 */
-		log.Printf("Arguments are %v\n", arguments)
-		log.Printf("Configuration is %v\n", config)
-		log.Printf("Running in router mode\n")
+		log.Printf("[INFO] Running in router mode\n")
 
 		if len(config.Workers) == 0 {
-			log.Printf("No workers defined.\n")
+			log.Printf("[ERROR] No workers defined.\n")
 			os.Exit(exitCodes.m["NO_WORKERS_DEFINED"])
 		}
 
@@ -167,24 +208,40 @@ func main() {
 		 * router(s) they are connected. The worker will execute the agent code and
 		 * pass the agent and it's results to a router.
 		 */
-		log.Printf("Arguments are %v\n", arguments)
-		log.Printf("Configuration is %v\n", config)
-		log.Printf("Running in worker mode\n")
+		log.Printf("[INFO] Running in worker mode\n")
 
 		if len(config.Routers) == 0 {
-			log.Printf("No routers defined.\n")
+			log.Printf("[ERROR] No routers defined.\n")
 			os.Exit(exitCodes.m["NO_ROUTERS_DEFINED"])
 		}
 
-		go gw.Main(config)
+		for key := range config.Routers {
+			go gw.Main(config, key)
+			time.Sleep(10 * time.Second)
+		}
+
 		select {}
 
 	case "setup":
-		log.Printf("Running in setup mode\n")
-		os.Exit(exitCodes.m["SETUP_FAILED"])
+		log.Printf("[INFO] Running in setup mode\n")
+		f := hclwrite.NewEmptyFile()
+		rootBody := f.Body()
+		rootBody.SetAttributeValue("name", cty.StringVal(config.Name))
+		rootBody.SetAttributeValue("mode", cty.StringVal("client"))
+		rootBody.SetAttributeValue("uuid", cty.StringVal(config.UUID))
+		rootBody.AppendNewline()
+
+		routerBlock1 := rootBody.AppendNewBlock("router", []string{config.Name})
+		routerBody1 := routerBlock1.Body()
+		routerBody1.SetAttributeValue("routerid", cty.StringVal(config.UUID))
+		routerBody1.SetAttributeValue("address", cty.StringVal("127.0.0.1"))
+		rootBody.AppendNewline()
+
+		log.Printf("\n%s", f.Bytes())
+		os.Exit(exitCodes.m["SUCCESS"])
 
 	default:
-		log.Printf("Unknown operating mode, exiting.\n")
+		log.Printf("[ERROR] Unknown operating mode, exiting.\n")
 		os.Exit(exitCodes.m["INVALID_MODE"])
 	}
 

@@ -6,7 +6,9 @@ type GagentConfig struct {
 	Mode       string           `hcl:"mode,attr"`
 	UUID       string           `hcl:"uuid,optional"`
 	ListenAddr string           `hcl:"listenaddr,optional"`
-	ListenPort int              `hcl:"listenport,optional"`
+	ClientPort int64            `hcl:"clientport,optional"`
+	RouterPort int64            `hcl:"routerport,optional"`
+	WorkerPort int64            `hcl:"workerport,optional"`
 	Clients    []*ClientDetails `hcl:"client,block"`
 	Routers    []*RouterDetails `hcl:"router,block"`
 	Workers    []*WorkerDetails `hcl:"worker,block"`
@@ -26,7 +28,7 @@ type ClientDetails struct {
 	 * the agent's results to. This attempts to keep the
 	 * clients unique globally.
 	 */
-	ClientID string `hcl:"clientid,attr"`
+	ClientID string `hcl:"clientid,optional"`
 }
 
 // RouterDetails is details about known routers
@@ -43,7 +45,7 @@ type RouterDetails struct {
 	 * which MQ router to send the agent's requests to.
 	 * This attempts to keep the routers unique globally.
 	 */
-	RouterID string `hcl:"uuid,attr"`
+	RouterID string `hcl:"routerid,attr"`
 
 	/*
 	 * This is the IP address or hostname the router
@@ -54,11 +56,24 @@ type RouterDetails struct {
 
 	/*
 	 * This is the is the port that the router listens
-	 * on.  If not defined, it will default to 35570
-	 * The router will start up a 0MQ service that
-	 * clients and workers will connect to.
+	 * on for clients. If not defined, it will default
+	 * to 35571.
 	 */
-	RouterPort string `hcl:"port,optional"`
+	ClientPort int64 `hcl:"clientport,optional"`
+
+	/*
+	 * This is the is the port that the router listens
+	 * on for routers. If not defined, it will default
+	 * to 35570.
+	 */
+	RouterPort int64 `hcl:"workerport,optional"`
+
+	/*
+	 * This is the is the port that the router listens
+	 * on for clients. If not defined, it will default
+	 * to 35572.
+	 */
+	WorkerPort int64 `hcl:"workerport,optional"`
 
 	/*
 	 * These tags will be passed to the router upon
@@ -83,7 +98,7 @@ type WorkerDetails struct {
 	 * send agents to. This attempts to keep the
 	 * workers unique globally.
 	 */
-	WorkerID string `hcl:"uuid,attr"`
+	WorkerID string `hcl:"workerid,attr"`
 
 	/*
 	 * These tags will be passed to the router upon

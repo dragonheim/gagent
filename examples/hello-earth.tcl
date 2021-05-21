@@ -2,12 +2,12 @@
 ### Hello Earth ###
 ###################
 # HINT START
-#  - console
+#  - thermal measurements
 #  - gravity measurements
 #  - gravity fluctuations
 # HINT END
 proc hello_earth {} {
-  puts "Hello Earth, does tempurature variations alter specific gravity?"
+  puts "Hello Earth, does localized tempurature variations alter specific gravity?"
 }
 
 hello_earth

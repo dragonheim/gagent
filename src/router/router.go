@@ -3,84 +3,88 @@ package router
 import (
 	"fmt"
 	"log"
-	"math/rand"
-	"time"
 
 	gs "git.dragonheim.net/dragonheim/gagent/src/gstructs"
-	picol "git.dragonheim.net/dragonheim/gagent/src/picol"
 
 	zmq "github.com/pebbe/zmq4"
 )
 
-func pop(msg []string) (head, tail []string) {
-	if msg[1] == "" {
-		head = msg[:2]
-		tail = msg[2:]
-	} else {
-		head = msg[:1]
-		tail = msg[1:]
-	}
-	return
-}
+const (
+	WORKER_READY = "\001" //  Signals worker is ready
+)
 
-//  Each router task works on one request at a time and sends a random number
-//  of replies back, with random delays between replies:
-func agentRouter(workerNum int) {
-	interp := picol.InitInterp()
-	interp.RegisterCoreCommands()
+// Main is the initiation function for a Router
+func Main(config gs.GagentConfig) {
+	log.Printf("[INFO] Starting router\n")
 
-	worker, _ := zmq.NewSocket(zmq.DEALER)
-	defer worker.Close()
-	worker.Connect("inproc://backend")
+	client_sock, _ := zmq.NewSocket(zmq.ROUTER)
+	defer client_sock.Close()
 
+	worker_sock, _ := zmq.NewSocket(zmq.DEALER)
+	defer worker_sock.Close()
+
+	client_sock.Bind(fmt.Sprintf("tcp://%s:%d", config.ListenAddr, config.ClientPort))
+	worker_sock.Bind(fmt.Sprintf("tcp://%s:%d", config.ListenAddr, config.WorkerPort))
+
+	workers := make([]string, 0)
+
+	poller1 := zmq.NewPoller()
+	poller1.Add(worker_sock, zmq.POLLIN)
+
+	poller2 := zmq.NewPoller()
+	poller2.Add(worker_sock, zmq.POLLIN)
+	poller2.Add(client_sock, zmq.POLLIN)
+
+LOOP:
 	for {
-		//  The DEALER socket gives us the reply envelope and message
-		msg, _ := worker.RecvMessage(0)
-		identity, content := pop(msg)
-		log.Printf("Recieved message: %s", content)
+		//  Poll frontend only if we have available workers
+		var sockets []zmq.Polled
+		var err error
+		if len(workers) > 0 {
+			sockets, err = poller2.Poll(-1)
+		} else {
+			sockets, err = poller1.Poll(-1)
+		}
+		if err != nil {
+			break //  Interrupted
+		}
+		for _, socket := range sockets {
+			switch s := socket.Socket; s {
+			case worker_sock: //  Handle worker activity on backend
+				//  Use worker identity for load-balancing
+				msg, err := s.RecvMessage(0)
+				if err != nil {
+					break LOOP //  Interrupted
+				}
+				var identity string
+				identity, msg = unwrap(msg)
+				log.Printf("[DEBUG] Worker message received: %s", msg)
+				workers = append(workers, identity)
 
-		//  Send 0..4 replies back
-		replies := rand.Intn(5)
-		for reply := 0; reply < replies; reply++ {
-			//  Sleep for some fraction of a second
-			time.Sleep(time.Duration(rand.Intn(1000)+1) * time.Millisecond)
+				//  Forward message to client if it's not a READY
+				if msg[0] != WORKER_READY {
+					client_sock.SendMessage(msg)
+				}
 
-			log.Printf("Worker %d: %s\n", workerNum, identity)
-			log.Printf("Worker %d: %s\n", workerNum, content)
-			worker.SendMessage(identity, content)
+			case client_sock:
+				//  Get client request, route to first available worker
+				msg, err := s.RecvMessage(0)
+				log.Printf("[DEBUG] Client message received: %s", msg)
+				if err == nil {
+					worker_sock.SendMessage(workers[0], "", msg)
+					workers = workers[1:]
+				}
+			}
 		}
 	}
 }
 
-// Main is the initiation function for a Router
-func Main(config gs.GagentConfig) {
-	/*
-	 * This is our router task.
-	 *
-	 * It uses the multi-threaded server model to deal requests out to a
-	 * pool of workers and route replies back to clients. One worker can
-	 * handle one request at a time but one client can talk to multiple
-	 * workers at once.
-	 *
-	 * Frontend socket talks to clients over TCP
-	 */
-	frontend, _ := zmq.NewSocket(zmq.ROUTER)
-	log.Printf("Starting router\n")
-	defer frontend.Close()
-
-	frontend.Bind(fmt.Sprintf("tcp://%s:%d", config.ListenAddr, config.ListenPort))
-
-	//  Backend socket talks to workers over inproc
-	backend, _ := zmq.NewSocket(zmq.DEALER)
-	defer backend.Close()
-	backend.Bind("inproc://backend")
-
-	//  Launch pool of worker threads, precise number is not critical
-	for i := 0; i < 5; i++ {
-		go agentRouter(i)
+func unwrap(msg []string) (head string, tail []string) {
+	head = msg[0]
+	if len(msg) > 1 && msg[1] == "" {
+		tail = msg[2:]
+	} else {
+		tail = msg[1:]
 	}
-
-	//  Connect backend to frontend via a proxy
-	err := zmq.Proxy(frontend, backend, nil)
-	log.Fatalln("Proxy interrupted:", err)
+	return
 }
