@@ -15,15 +15,15 @@ volumes:
       path: /run/docker.sock
 
 steps:
-  # - name: Notify Datadog That we are starting
-  #   image: masci/drone-datadog
-  #   settings:
-  #     api_key:
-  #       from_secret: Datadog
-  #     events:
-  #       - title: "Begin Build: ${DRONE_REPO}(${DRONE_BUILD_NUMBER})"
-  #         text: ${DRONE_COMMIT_MESSAGE}(${DRONE_COMMIT_LINK})
-  #         alert_type: "info"
+  - name: Notify Datadog That We Are Starting
+    image: masci/drone-datadog
+    settings:
+      api_key:
+        from_secret: Datadog
+      events:
+        - title: "Begin Build: ${DRONE_REPO}(${DRONE_BUILD_NUMBER})"
+          text: ${DRONE_COMMIT_MESSAGE}(${DRONE_COMMIT_LINK})
+          alert_type: "info"
   #         host: ${DRONE_SYSTEM_HOSTNAME}
 
   - name: Validate code base and dependencies
@@ -69,7 +69,7 @@ steps:
       - trivy image --skip-update --exit-code 1 --severity CRITICAL ${DRONE_REPO}:${DRONE_COMMIT}
 
 
-  - name: Notify Datadog
+  - name: Notify Datadog That We Have Completed
     image: masci/drone-datadog
     settings:
       api_key:
