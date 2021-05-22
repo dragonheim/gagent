@@ -23,9 +23,8 @@ steps:
       events:
         - title: "Begin Build: ${DRONE_REPO}(${DRONE_BUILD_NUMBER})"
           text: "Build ${DRONE_BUILD_NUMBER}"
-          alert_type: "error"
+          alert_type: "info"
         #   text: ${DRONE_COMMIT_MESSAGE}(${DRONE_COMMIT_LINK})
-        #   alert_type: "info"
         #   # host: ${DRONE_SYSTEM_HOSTNAME}
 
   - name: Validate code base and dependencies
