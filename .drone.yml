@@ -21,10 +21,13 @@ steps:
       api_key:
         from_secret: Datadog
       events:
-        - title: "Begin Build: ${DRONE_REPO}(${DRONE_BUILD_NUMBER})"
-          text: ${DRONE_COMMIT_MESSAGE}(${DRONE_COMMIT_LINK})
-          alert_type: "info"
-  #         host: ${DRONE_SYSTEM_HOSTNAME}
+        - title: "Build failure on amd64"
+          text: "Build ${DRONE_BUILD_NUMBER}"
+          alert_type: "error"
+        # - title: "Begin Build: ${DRONE_REPO}(${DRONE_BUILD_NUMBER})"
+        #   text: ${DRONE_COMMIT_MESSAGE}(${DRONE_COMMIT_LINK})
+        #   alert_type: "info"
+        #   # host: ${DRONE_SYSTEM_HOSTNAME}
 
   - name: Validate code base and dependencies
     # image: golang:1.16-alpine3.13
