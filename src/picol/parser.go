@@ -246,5 +246,5 @@ func (p *Parser) GetToken() string {
 			return p.parseString()
 		}
 	}
-	return p.token() /* unreached */
+	/*	return p.token() /* unreached */
 }

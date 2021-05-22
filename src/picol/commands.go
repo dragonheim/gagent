@@ -7,7 +7,7 @@ import (
 )
 
 func ArityErr(i *Interp, name string, argv []string) error {
-	return fmt.Errorf("Wrong number of args for %s %s", name, argv)
+	return fmt.Errorf("wrong number of args for %s %s", name, argv)
 }
 
 func CommandMath(i *Interp, argv []string, pd interface{}) (string, error) {
@@ -104,9 +104,9 @@ func CommandWhile(i *Interp, argv []string, pd interface{}) (string, error) {
 		if r, _ := strconv.Atoi(result); r != 0 {
 			result, err := i.Eval(argv[2])
 			switch err {
-			case PICOL_CONTINUE, nil:
+			case errContinue, nil:
 				//pass
-			case PICOL_BREAK:
+			case errBreak:
 				return result, nil
 			default:
 				return result, err
@@ -123,9 +123,9 @@ func CommandRetCodes(i *Interp, argv []string, pd interface{}) (string, error) {
 	}
 	switch argv[0] {
 	case "break":
-		return "", PICOL_BREAK
+		return "", errBreak
 	case "continue":
-		return "", PICOL_CONTINUE
+		return "", errContinue
 	}
 	return "", nil
 }
@@ -152,12 +152,12 @@ func CommandCallProc(i *Interp, argv []string, pd interface{}) (string, error) {
 	}
 
 	if arity != len(argv)-1 {
-		return "", fmt.Errorf("Proc '%s' called with wrong arg num", argv[0])
+		return "", fmt.Errorf("proc '%s' called with wrong arg num", argv[0])
 	}
 
 	body := x[1]
 	result, err := i.Eval(body)
-	if err == PICOL_RETURN {
+	if err == errReturn {
 		err = nil
 	}
 	return result, err
@@ -178,7 +178,7 @@ func CommandReturn(i *Interp, argv []string, pd interface{}) (string, error) {
 	if len(argv) == 2 {
 		r = argv[1]
 	}
-	return r, PICOL_RETURN
+	return r, errReturn
 }
 
 func CommandError(i *Interp, argv []string, pd interface{}) (string, error) {
@@ -190,7 +190,7 @@ func CommandError(i *Interp, argv []string, pd interface{}) (string, error) {
 
 func CommandPuts(i *Interp, argv []string, pd interface{}) (string, error) {
 	if len(argv) != 2 {
-		return "", fmt.Errorf("Wrong number of args for %s %s", argv[0], argv)
+		return "", fmt.Errorf("wrong number of args for %s %s", argv[0], argv)
 	}
 	fmt.Println(argv[1])
 	return "", nil
