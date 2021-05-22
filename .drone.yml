@@ -18,6 +18,9 @@ steps:
   - name: Validate code base and dependencies
     # image: golang:1.16-alpine3.13
     image: dragonheim/golang:1.16.4
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
     environment:
       TRIVY_QUIET: true
       TRIVY_LIGHT: true
