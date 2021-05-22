@@ -15,31 +15,33 @@ volumes:
       path: /run/docker.sock
 
 steps:
-  - name: Format Code
+  - name: Validate code base
     # image: golang:1.16-alpine3.13
     image: golang:1.16.4
-    # volumes:
-    #   - name: dockersock
-    #     path: /var/run/docker.sock
-    environment:
-    #   - CGO_ENABLED: 0
     commands:
+      ### Populate temporary container with tools / files we will need for building and testing
       # - apk add --no-cache zeromq-dev build-base git
-      - go fmt ./...
-      - go vet ./...
       # - curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v0.18.2
-      - trivy --quiet repo --exit-code 1 --ignore-unfixed -f json ${DRONE_GIT_HTTP_URL}
+      ### Format the go code. Go does not care about it, but it helps to ensure everything is formated the same.
+      - go fmt ./...
+      ### Perform a basic lint of the code, we do this after formatting, just in case there are edge cases with the formatting.
+      - go vet ./...
+      ### Run a security check and warn us about lower level vulnerabilities
+      - trivy --quiet --light repo --exit-code 0 --ignore-unfixed -f table --severity UNKNOWN,LOW,MEDIUM ${DRONE_GIT_HTTP_URL}
+      ### Re-run the scan, but this time looking for higher level vulnerabilities that we want to block for.
+      - trivy --quiet --light repo --exit-code 1 --ignore-unfixed -f table --severity CRITICAL,HIGH ${DRONE_GIT_HTTP_URL}
+      ### Perform unit tests
+      # - @TODO I really don't know how to do unit tests.  Will need to figure this out eventually.
 
-#   - name: Send Status To Datadog
-#     image: masci/drone-datadog
-#     settings:
-#       api_key:
-#         from_secret: Datadog
-#       events:
-#         - title: "Build failure on amd64"
-#           text: "Build ${DRONE_BUILD_NUMBER}"
-#           alert_type: "error"
-#     when:
-#       status:
-#         - failure
-# 
+  - name: Send Status To Datadog
+    image: masci/drone-datadog
+    settings:
+      api_key:
+        from_secret: Datadog
+      events:
+        - title: "Build failure on amd64"
+          text: "Build ${DRONE_BUILD_NUMBER}"
+          alert_type: "error"
+    when:
+      status:
+        - failure
