@@ -28,7 +28,7 @@ steps:
       - go fmt ./...
       - go vet ./...
       # - curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v0.18.2
-      - trivy repo --quiet --exit-code 1 --ignore-unfixed -f json ${DRONE_GIT_HTTP_URL}
+      - trivy --quiet repo --exit-code 1 --ignore-unfixed -f json ${DRONE_GIT_HTTP_URL}
 
 #   - name: Send Status To Datadog
 #     image: masci/drone-datadog
