@@ -51,6 +51,12 @@ steps:
       # - docker buildx build --platform linux/arm/v7,linux/amd64,linux/arm64 --progress plain -t ${DRONE_REPO}:${DRONE_COMMIT} .
       - docker buildx build --platform linux/amd64 --progress plain -t ${DRONE_REPO}:${DRONE_COMMIT} -f docker/Dockerfile .
 
+      ### Run a security check and warn us about lower level vulnerabilities
+      - trivy image --skip-update --exit-code 0 --severity UNKNOWN,LOW,MEDIUM ${DRONE_REPO}:${DRONE_COMMIT}
+
+      ### Re-run the scan, but this time looking for higher level vulnerabilities that we want to block for.
+      - trivy image --skip-update --exit-code 1 --severity CRITICAL,HIGH ${DRONE_REPO}:${DRONE_COMMIT}
+
 
   - name: Notify Datadog
     image: masci/drone-datadog
