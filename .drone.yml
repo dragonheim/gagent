@@ -22,7 +22,7 @@ steps:
         from_secret: Datadog
       events:
         - title: "Begin Build: ${DRONE_REPO}"
-          text: "${DRONE_COMMIT_LINK}"
+          text: "Build ${DRONE_BUILD_NUMBER}(${DRONE_COMMIT_LINK})"
           alert_type: "info"
           host: ${DRONE_SYSTEM_HOSTNAME}
 
