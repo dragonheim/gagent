@@ -49,7 +49,7 @@ steps:
 
       ### Build test container.
       # - docker buildx build --platform linux/arm/v7,linux/amd64,linux/arm64 --progress plain -t ${DRONE_REPO}:${DRONE_COMMIT} .
-      - docker buildx build --platform linux/amd64 --progress plain -t ${DRONE_REPO}:${DRONE_COMMIT} .
+      - docker buildx build --platform linux/amd64 --progress plain -t ${DRONE_REPO}:${DRONE_COMMIT} -f docker/Dockerfile .
 
 
   - name: Notify Datadog
