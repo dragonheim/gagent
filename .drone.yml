@@ -48,7 +48,8 @@ steps:
       # - @TODO I really don't know how to do unit tests.  Will need to figure this out eventually.
 
       ### Build test container.
-      - docker buildx build --platform linux/arm/v7,linux/amd64,linux/arm64 --progress plain -t ${DRONE_REPO}:${DRONE_COMMIT} .
+      # - docker buildx build --platform linux/arm/v7,linux/amd64,linux/arm64 --progress plain -t ${DRONE_REPO}:${DRONE_COMMIT} .
+      - docker buildx build --platform linux/amd64 --progress plain -t ${DRONE_REPO}:${DRONE_COMMIT} .
 
 
   - name: Notify Datadog
