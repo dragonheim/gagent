@@ -18,6 +18,12 @@ steps:
   - name: Validate code base
     # image: golang:1.16-alpine3.13
     image: golang:1.16.4
+    environment:
+      TRIVY_QUIET: true
+      TRIVY_LIGHT: true
+      TRIVY_FORMAT: table
+      TRIVY_IGNORE_UNFIXED: true
+      TRIVY_NO_PROGRESS: true
     commands:
       ### Populate temporary container with tools / files we will need for building and testing
       # - apk add --no-cache zeromq-dev build-base git
@@ -27,9 +33,9 @@ steps:
       ### Perform a basic lint of the code, we do this after formatting, just in case there are edge cases with the formatting.
       - go vet ./...
       ### Run a security check and warn us about lower level vulnerabilities
-      - trivy --quiet --light repo --exit-code 0 --ignore-unfixed -f table --severity UNKNOWN,LOW,MEDIUM ${DRONE_GIT_HTTP_URL}
+      - trivy repo --exit-code 0 --severity UNKNOWN,LOW,MEDIUM ${DRONE_GIT_HTTP_URL}
       ### Re-run the scan, but this time looking for higher level vulnerabilities that we want to block for.
-      - trivy --quiet --light repo --exit-code 1 --ignore-unfixed -f table --severity CRITICAL,HIGH ${DRONE_GIT_HTTP_URL}
+      - trivy repo --skip-update --exit-code 1 --severity CRITICAL,HIGH ${DRONE_GIT_HTTP_URL}
       ### Perform unit tests
       # - @TODO I really don't know how to do unit tests.  Will need to figure this out eventually.
 
