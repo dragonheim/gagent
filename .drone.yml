@@ -24,7 +24,6 @@ steps:
         - title: "Begin Build: ${DRONE_REPO}"
           text: "Build ${DRONE_BUILD_NUMBER}(${DRONE_COMMIT_LINK})"
           alert_type: "info"
-          host: ${DRONE_STAGE_MACHINE}
 
   - name: Validate code base and dependencies
     # image: golang:1.16-alpine3.13
