@@ -16,14 +16,18 @@ volumes:
 
 steps:
   - name: Format Code
-    image: golang:1.16-alpine3.13
+    # image: golang:1.16-alpine3.13
+    image: golang:1.16.4
     # volumes:
     #   - name: dockersock
     #     path: /var/run/docker.sock
+    environment:
+    #   - CGO_ENABLED: 0
     commands:
+      # - apk add --no-cache zeromq-dev build-base git
       - go fmt ./...
       - go vet ./...
-      - curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v0.18.2
+      # - curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v0.18.2
       - trivy repo ${DRONE_GIT_HTTP_URL}
 
 #   - name: Send Status To Datadog
