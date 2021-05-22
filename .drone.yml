@@ -15,9 +15,9 @@ volumes:
       path: /run/docker.sock
 
 steps:
-  - name: Validate code base
+  - name: Validate code base and dependencies
     # image: golang:1.16-alpine3.13
-    image: golang:1.16.4
+    image: dragonheim/golang:1.16.4
     environment:
       TRIVY_QUIET: true
       TRIVY_LIGHT: true
@@ -26,20 +26,29 @@ steps:
       TRIVY_NO_PROGRESS: true
     commands:
       ### Populate temporary container with tools / files we will need for building and testing
-      # - apk add --no-cache zeromq-dev build-base git
+      - apk add --no-cache zeromq-dev zeromq
       # - curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v0.18.2
+
       ### Format the go code. Go does not care about it, but it helps to ensure everything is formated the same.
       - go fmt ./...
+
       ### Perform a basic lint of the code, we do this after formatting, just in case there are edge cases with the formatting.
       - go vet ./...
+
       ### Run a security check and warn us about lower level vulnerabilities
       - trivy fs --exit-code 0 --severity UNKNOWN,LOW,MEDIUM .
+
       ### Re-run the scan, but this time looking for higher level vulnerabilities that we want to block for.
       - trivy fs --skip-update --exit-code 1 --severity CRITICAL,HIGH .
+
       ### Perform unit tests
       # - @TODO I really don't know how to do unit tests.  Will need to figure this out eventually.
 
-  - name: Send Status To Datadog
+      ### Build test container.
+      - docker buildx build --platform linux/arm/v7,linux/amd64,linux/arm64 --progress plain -t ${DRONE_REPO}:${DRONE_COMMIT} .
+
+
+  - name: Notify Datadog
     image: masci/drone-datadog
     settings:
       api_key:
