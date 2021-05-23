@@ -9,7 +9,7 @@ require (
 	github.com/hashicorp/logutils v1.0.0
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d
-	github.com/pebbe/zmq4 v1.2.2
+	github.com/pebbe/zmq4 v1.2.6
 	github.com/zclconf/go-cty v1.8.3
 	golang.org/x/text v0.3.6 // indirect
 )
