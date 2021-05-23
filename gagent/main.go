@@ -14,10 +14,10 @@ import (
 
 	docopt "github.com/aviddiviner/docopt-go"
 	hclsimple "github.com/hashicorp/hcl/v2/hclsimple"
-	"github.com/hashicorp/hcl/v2/hclwrite"
-	"github.com/hashicorp/logutils"
+	hclwrite "github.com/hashicorp/hcl/v2/hclwrite"
+	logutils "github.com/hashicorp/logutils"
 	uuid "github.com/nu7hatch/gouuid"
-	"github.com/zclconf/go-cty/cty"
+	cty "github.com/zclconf/go-cty/cty"
 )
 
 const VERSION = "0.0.1"

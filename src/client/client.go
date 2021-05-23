@@ -7,6 +7,7 @@ import (
 	"time"
 
 	gs "git.dragonheim.net/dragonheim/gagent/src/gstructs"
+
 	zmq "github.com/pebbe/zmq4"
 )
 
