@@ -7,9 +7,9 @@ import (
 )
 
 var (
-	PICOL_RETURN   = errors.New("RETURN")
-	PICOL_BREAK    = errors.New("BREAK")
-	PICOL_CONTINUE = errors.New("CONTINUE")
+	errReturn   = errors.New("RETURN")
+	errBreak    = errors.New("BREAK")
+	errContinue = errors.New("CONTINUE")
 )
 
 type Var string
@@ -91,7 +91,7 @@ func (i *Interp) Eval(t string) (string, error) {
 		case PT_VAR:
 			v, ok := i.Var(t)
 			if !ok {
-				return "", fmt.Errorf("No such variable '%s'", t)
+				return "", fmt.Errorf("no such variable '%s'", t)
 			}
 			t = string(v)
 		case PT_CMD:
@@ -114,7 +114,7 @@ func (i *Interp) Eval(t string) (string, error) {
 			if len(argv) != 0 {
 				c := i.Command(argv[0])
 				if c == nil {
-					return "", fmt.Errorf("No such command '%s'", argv[0])
+					return "", fmt.Errorf("no such command '%s'", argv[0])
 				}
 				result, err = c.fn(i, argv, c.privdata)
 				if err != nil {
