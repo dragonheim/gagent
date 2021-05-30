@@ -31,5 +31,5 @@ func Main(config gs.GagentConfig, rid int) {
 	if err != nil {
 		log.Printf("[DEBUG] Received error: %v", err)
 	}
-	log.Printf("[DEBUG] Recieved message: %v", msg[0])
+	log.Printf("[DEBUG] Received message: %v", msg[0])
 }
