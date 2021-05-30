@@ -29,7 +29,7 @@ func Main(config gs.GagentConfig, rid int) {
 
 	msg, err := subscriber.Recv(0)
 	if err != nil {
-		log.Printf("[DEBUG] Recieved error: %v", err)
+		log.Printf("[DEBUG] Received error: %v", err)
 	}
 	log.Printf("[DEBUG] Recieved message: %v", msg[0])
 }
