@@ -53,13 +53,13 @@ func main() {
 	/*
 	 * Set a default UUID for this node.
 	 * This is used throughout the G'Agent system to uniquely identify this node.
-	 * It can be overriden in the configuration file by setting uuid
+	 * It can be overridden in the configuration file by setting uuid
 	 */
 	identity, _ := uuid.NewV5(uuid.NamespaceURL, []byte("gagent"+config.Name))
 	config.UUID = identity.String()
 
 	/*
-	 * By default, we want to listen on all IP addresses. It can be overriden
+	 * By default, we want to listen on all IP addresses. It can be overridden
 	 * in the configuration file by setting listenaddr
 	 */
 	config.ListenAddr = "0.0.0.0"
@@ -109,7 +109,7 @@ func main() {
 	usage += "  client   -- Start as a G'Agent client \n"
 	usage += "  router   -- Start as a G'Agent router \n"
 	usage += "  worker   -- Start as a G'Agent worker \n"
-	usage += "  setup    -- Write inital configuration file \n"
+	usage += "  setup    -- Write initial configuration file \n"
 	usage += "\n"
 
 	usage += "Options:\n"
