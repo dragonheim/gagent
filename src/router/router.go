@@ -9,6 +9,7 @@ import (
 	zmq "github.com/pebbe/zmq4"
 )
 
+// @TODO -- This was documented in the example, and I am unclear what it does
 const (
 	WORKER_READY = "\001" //  Signals worker is ready
 )
@@ -17,23 +18,23 @@ const (
 func Main(config gs.GagentConfig) {
 	log.Printf("[INFO] Starting router\n")
 
-	client_sock, _ := zmq.NewSocket(zmq.ROUTER)
-	defer client_sock.Close()
+	clientSock, _ := zmq.NewSocket(zmq.ROUTER)
+	defer clientSock.Close()
 
-	worker_sock, _ := zmq.NewSocket(zmq.DEALER)
-	defer worker_sock.Close()
+	workerSock, _ := zmq.NewSocket(zmq.DEALER)
+	defer workerSock.Close()
 
-	client_sock.Bind(fmt.Sprintf("tcp://%s:%d", config.ListenAddr, config.ClientPort))
-	worker_sock.Bind(fmt.Sprintf("tcp://%s:%d", config.ListenAddr, config.WorkerPort))
+	clientSock.Bind(fmt.Sprintf("tcp://%s:%d", config.ListenAddr, config.ClientPort))
+	workerSock.Bind(fmt.Sprintf("tcp://%s:%d", config.ListenAddr, config.WorkerPort))
 
 	workers := make([]string, 0)
 
 	poller1 := zmq.NewPoller()
-	poller1.Add(worker_sock, zmq.POLLIN)
+	poller1.Add(workerSock, zmq.POLLIN)
 
 	poller2 := zmq.NewPoller()
-	poller2.Add(worker_sock, zmq.POLLIN)
-	poller2.Add(client_sock, zmq.POLLIN)
+	poller2.Add(workerSock, zmq.POLLIN)
+	poller2.Add(clientSock, zmq.POLLIN)
 
 LOOP:
 	for {
@@ -50,7 +51,7 @@ LOOP:
 		}
 		for _, socket := range sockets {
 			switch s := socket.Socket; s {
-			case worker_sock: //  Handle worker activity on backend
+			case workerSock: //  Handle worker activity on backend
 				//  Use worker identity for load-balancing
 				msg, err := s.RecvMessage(0)
 				if err != nil {
@@ -63,15 +64,15 @@ LOOP:
 
 				//  Forward message to client if it's not a READY
 				if msg[0] != WORKER_READY {
-					client_sock.SendMessage(msg)
+					clientSock.SendMessage(msg)
 				}
 
-			case client_sock:
+			case clientSock:
 				//  Get client request, route to first available worker
 				msg, err := s.RecvMessage(0)
 				log.Printf("[DEBUG] Client message received: %s", msg)
 				if err == nil {
-					worker_sock.SendMessage(workers[0], "", msg)
+					workerSock.SendMessage(workers[0], "", msg)
 					workers = workers[1:]
 				}
 			}

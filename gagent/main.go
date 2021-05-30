@@ -20,6 +20,7 @@ import (
 	cty "github.com/zclconf/go-cty/cty"
 )
 
+// G'Agent version number.
 const VERSION = "0.0.1"
 
 var exitCodes = struct {

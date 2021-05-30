@@ -12,6 +12,7 @@ import (
 
 var fname = flag.String("f", "", "file name")
 
+// TCL puts function.
 func CommandPuts(i *picol.Interp, argv []string, pd interface{}) (string, error) {
 	if len(argv) != 2 {
 		return "", fmt.Errorf("Wrong number of args for %s %s", argv[0], argv)
