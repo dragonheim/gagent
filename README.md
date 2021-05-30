@@ -1,5 +1,6 @@
 # G'Agent
 [![Build Status](https://drone.dragonheim.net/api/badges/dragonheim/gagent/status.svg)](https://drone.dragonheim.net/dragonheim/gagent)
+[![Go Report Card](https://goreportcard.com/badge/git.dragonheim.net/dragonheim/gagent)](https://goreportcard.com/report/git.dragonheim.net/dragonheim/gagent)
 
 A Golang based mobile agent system loosely inspired by the [Agent Tcl / D'Agents](http://www.cs.dartmouth.edu/~dfk/agents/) system created by Robert S. Gray of Dartmouth college.
 
