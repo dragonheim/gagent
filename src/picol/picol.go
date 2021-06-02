@@ -73,7 +73,7 @@ func (i *Interp) RegisterCommand(name string, fn CmdFunc, privdata interface{}) 
 
 /* EVAL! */
 func (i *Interp) Eval(t string) (string, error) {
-	p := InitParser(t)
+	p := initParser(t)
 	var result string
 	var err error
 
@@ -83,33 +83,33 @@ func (i *Interp) Eval(t string) (string, error) {
 		prevtype := p.Type
 		// XXX
 		t = p.GetToken()
-		if p.Type == pt_EOF {
+		if p.Type == ptEOF {
 			break
 		}
 
 		switch p.Type {
-		case pt_VAR:
+		case ptVAR:
 			v, ok := i.Var(t)
 			if !ok {
 				return "", fmt.Errorf("no such variable '%s'", t)
 			}
 			t = string(v)
-		case pt_CMD:
+		case ptCMD:
 			result, err = i.Eval(t)
 			if err != nil {
 				return result, err
 			} else {
 				t = result
 			}
-		case pt_ESC:
+		case ptESC:
 			// XXX: escape handling missing!
-		case pt_SEP:
+		case ptSEP:
 			prevtype = p.Type
 			continue
 		}
 
 		// We have a complete command + args. Call it!
-		if p.Type == pt_EOL {
+		if p.Type == ptEOL {
 			prevtype = p.Type
 			if len(argv) != 0 {
 				c := i.Command(argv[0])
@@ -127,7 +127,7 @@ func (i *Interp) Eval(t string) (string, error) {
 		}
 
 		// We have a new token, append to the previous or as new arg?
-		if prevtype == pt_SEP || prevtype == pt_EOL {
+		if prevtype == ptSEP || prevtype == ptEOL {
 			argv = append(argv, t)
 		} else { // Interpolation
 			argv[len(argv)-1] = strings.Join([]string{argv[len(argv)-1], t}, "")
