@@ -83,33 +83,33 @@ func (i *Interp) Eval(t string) (string, error) {
 		prevtype := p.Type
 		// XXX
 		t = p.GetToken()
-		if p.Type == PT_EOF {
+		if p.Type == pt_EOF {
 			break
 		}
 
 		switch p.Type {
-		case PT_VAR:
+		case pt_VAR:
 			v, ok := i.Var(t)
 			if !ok {
 				return "", fmt.Errorf("no such variable '%s'", t)
 			}
 			t = string(v)
-		case PT_CMD:
+		case pt_CMD:
 			result, err = i.Eval(t)
 			if err != nil {
 				return result, err
 			} else {
 				t = result
 			}
-		case PT_ESC:
+		case pt_ESC:
 			// XXX: escape handling missing!
-		case PT_SEP:
+		case pt_SEP:
 			prevtype = p.Type
 			continue
 		}
 
 		// We have a complete command + args. Call it!
-		if p.Type == PT_EOL {
+		if p.Type == pt_EOL {
 			prevtype = p.Type
 			if len(argv) != 0 {
 				c := i.Command(argv[0])
@@ -127,7 +127,7 @@ func (i *Interp) Eval(t string) (string, error) {
 		}
 
 		// We have a new token, append to the previous or as new arg?
-		if prevtype == PT_SEP || prevtype == PT_EOL {
+		if prevtype == pt_SEP || prevtype == pt_EOL {
 			argv = append(argv, t)
 		} else { // Interpolation
 			argv[len(argv)-1] = strings.Join([]string{argv[len(argv)-1], t}, "")

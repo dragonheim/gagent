@@ -6,16 +6,16 @@ import (
 )
 
 /*
- * PT_ESC is @TODO
+ * pt_ESC is @TODO
  */
 const (
-	PT_ESC = iota
-	PT_STR
-	PT_CMD
-	PT_VAR
-	PT_SEP
-	PT_EOL
-	PT_EOF
+	pt_ESC = iota
+	pt_STR
+	pt_CMD
+	pt_VAR
+	pt_SEP
+	pt_EOL
+	pt_EOF
 )
 
 type parserStruct struct {
@@ -26,7 +26,7 @@ type parserStruct struct {
 }
 
 func InitParser(text string) *parserStruct {
-	return &parserStruct{text, 0, 0, 0, len(text), 0, PT_EOL}
+	return &parserStruct{text, 0, 0, 0, len(text), 0, pt_EOL}
 }
 
 func (p *parserStruct) next() {
@@ -53,7 +53,7 @@ func (p *parserStruct) parseSep() string {
 		}
 	}
 	p.end = p.p
-	p.Type = PT_SEP
+	p.Type = pt_SEP
 	return p.token()
 }
 
@@ -69,7 +69,7 @@ func (p *parserStruct) parseEol() string {
 	}
 
 	p.end = p.p
-	p.Type = PT_EOL
+	p.Type = pt_EOL
 	return p.token()
 }
 
@@ -99,7 +99,7 @@ Loop:
 		p.next()
 	}
 	p.end = p.p
-	p.Type = PT_CMD
+	p.Type = pt_CMD
 	if p.p < len(p.text) && p.current() == ']' {
 		p.next()
 	}
@@ -111,7 +111,7 @@ func (p *parserStruct) parseVar() string {
 	p.start = p.p
 
 	if p.current() == '{' {
-		p.Type = PT_VAR
+		p.Type = pt_VAR
 		return p.parseBrace()
 	}
 
@@ -127,10 +127,10 @@ func (p *parserStruct) parseVar() string {
 	if p.start == p.p { // It's just a single char string "$"
 		p.start = p.p - 1
 		p.end = p.p
-		p.Type = PT_STR
+		p.Type = pt_STR
 	} else {
 		p.end = p.p
-		p.Type = PT_VAR
+		p.Type = pt_VAR
 	}
 	return p.token()
 }
@@ -164,10 +164,10 @@ Loop:
 }
 
 func (p *parserStruct) parseString() string {
-	newword := p.Type == PT_SEP || p.Type == PT_EOL || p.Type == PT_STR
+	newword := p.Type == pt_SEP || p.Type == pt_EOL || p.Type == pt_STR
 
 	if c := p.current(); newword && c == '{' {
-		p.Type = PT_STR
+		p.Type = pt_STR
 		return p.parseBrace()
 	} else if newword && c == '"' {
 		p.insidequote = 1
@@ -188,7 +188,7 @@ Loop:
 		case '"':
 			if p.insidequote != 0 {
 				p.end = p.p
-				p.Type = PT_ESC
+				p.Type = pt_ESC
 				p.next()
 				p.insidequote = 0
 				return p.token()
@@ -202,7 +202,7 @@ Loop:
 	}
 
 	p.end = p.p
-	p.Type = PT_ESC
+	p.Type = pt_ESC
 	return p.token()
 }
 
@@ -216,10 +216,10 @@ func (p *parserStruct) parseComment() string {
 func (p *parserStruct) GetToken() string {
 	for {
 		if p.ln == 0 {
-			if p.Type != PT_EOL && p.Type != PT_EOF {
-				p.Type = PT_EOL
+			if p.Type != pt_EOL && p.Type != pt_EOF {
+				p.Type = pt_EOL
 			} else {
-				p.Type = PT_EOF
+				p.Type = pt_EOF
 			}
 			return p.token()
 		}
@@ -240,7 +240,7 @@ func (p *parserStruct) GetToken() string {
 		case '$':
 			return p.parseVar()
 		case '#':
-			if p.Type == PT_EOL {
+			if p.Type == pt_EOL {
 				p.parseComment()
 				continue
 			}
