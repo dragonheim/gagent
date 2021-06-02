@@ -5,6 +5,9 @@ import (
 	"unicode/utf8"
 )
 
+/*
+ * PT_ESC is @TODO
+ */
 const (
 	PT_ESC = iota
 	PT_STR
