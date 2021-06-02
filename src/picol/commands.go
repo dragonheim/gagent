@@ -10,6 +10,7 @@ func ArityErr(i *Interp, name string, argv []string) error {
 	return fmt.Errorf("wrong number of args for %s %s", name, argv)
 }
 
+// CommandMath is the math command for TCL
 func CommandMath(i *Interp, argv []string, pd interface{}) (string, error) {
 	if len(argv) != 3 {
 		return "", ArityErr(i, argv[0], argv)
@@ -56,6 +57,7 @@ func CommandMath(i *Interp, argv []string, pd interface{}) (string, error) {
 	return fmt.Sprintf("%d", c), nil
 }
 
+// CommandSet is the set command for TCL
 func CommandSet(i *Interp, argv []string, pd interface{}) (string, error) {
 	if len(argv) != 3 {
 		return "", ArityErr(i, argv[0], argv)
@@ -64,6 +66,7 @@ func CommandSet(i *Interp, argv []string, pd interface{}) (string, error) {
 	return argv[2], nil
 }
 
+// CommandUnset is the unset command for TCL
 func CommandUnset(i *Interp, argv []string, pd interface{}) (string, error) {
 	if len(argv) != 2 {
 		return "", ArityErr(i, argv[0], argv)
@@ -72,6 +75,7 @@ func CommandUnset(i *Interp, argv []string, pd interface{}) (string, error) {
 	return "", nil
 }
 
+// CommandIf is the if command for TCL
 func CommandIf(i *Interp, argv []string, pd interface{}) (string, error) {
 	if len(argv) != 3 && len(argv) != 5 {
 		return "", ArityErr(i, argv[0], argv)
@@ -91,6 +95,7 @@ func CommandIf(i *Interp, argv []string, pd interface{}) (string, error) {
 	return result, nil
 }
 
+// CommandWhile is the while command for TCL
 func CommandWhile(i *Interp, argv []string, pd interface{}) (string, error) {
 	if len(argv) != 3 {
 		return "", ArityErr(i, argv[0], argv)
@@ -117,6 +122,7 @@ func CommandWhile(i *Interp, argv []string, pd interface{}) (string, error) {
 	}
 }
 
+// CommandRetCodes is a function to get the return codes for TCL
 func CommandRetCodes(i *Interp, argv []string, pd interface{}) (string, error) {
 	if len(argv) != 1 {
 		return "", ArityErr(i, argv[0], argv)
@@ -130,6 +136,7 @@ func CommandRetCodes(i *Interp, argv []string, pd interface{}) (string, error) {
 	return "", nil
 }
 
+// CommandCallProc is a function to call proc commands for TCL
 func CommandCallProc(i *Interp, argv []string, pd interface{}) (string, error) {
 	var x []string
 
@@ -163,6 +170,7 @@ func CommandCallProc(i *Interp, argv []string, pd interface{}) (string, error) {
 	return result, err
 }
 
+// CommandProc is a function to register proc commands for TCL
 func CommandProc(i *Interp, argv []string, pd interface{}) (string, error) {
 	if len(argv) != 4 {
 		return "", ArityErr(i, argv[0], argv)
@@ -170,6 +178,7 @@ func CommandProc(i *Interp, argv []string, pd interface{}) (string, error) {
 	return "", i.RegisterCommand(argv[1], CommandCallProc, []string{argv[2], argv[3]})
 }
 
+// CommandReturn is a function to register return codes for commands for TCL
 func CommandReturn(i *Interp, argv []string, pd interface{}) (string, error) {
 	if len(argv) != 1 && len(argv) != 2 {
 		return "", ArityErr(i, argv[0], argv)
@@ -181,6 +190,7 @@ func CommandReturn(i *Interp, argv []string, pd interface{}) (string, error) {
 	return r, errReturn
 }
 
+// CommandError is a function to return error codes for commands for TCL
 func CommandError(i *Interp, argv []string, pd interface{}) (string, error) {
 	if len(argv) != 1 && len(argv) != 2 {
 		return "", ArityErr(i, argv[0], argv)
@@ -188,6 +198,7 @@ func CommandError(i *Interp, argv []string, pd interface{}) (string, error) {
 	return "", fmt.Errorf(argv[1])
 }
 
+// CommandPuts is a function to print strings for TCL
 func CommandPuts(i *Interp, argv []string, pd interface{}) (string, error) {
 	if len(argv) != 2 {
 		return "", fmt.Errorf("wrong number of args for %s %s", argv[0], argv)
@@ -196,6 +207,7 @@ func CommandPuts(i *Interp, argv []string, pd interface{}) (string, error) {
 	return "", nil
 }
 
+// RegisterCoreCommands is a callable to register TCL commands.
 func (i *Interp) RegisterCoreCommands() {
 	name := [...]string{"+", "-", "*", "/", ">", ">=", "<", "<=", "==", "!="}
 	for _, n := range name {
