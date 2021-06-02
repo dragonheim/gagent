@@ -15,34 +15,34 @@ const (
 	PT_EOF
 )
 
-type Parser struct {
+type parserStruct struct {
 	text              string
 	p, start, end, ln int
 	insidequote       int
 	Type              int
 }
 
-func InitParser(text string) *Parser {
-	return &Parser{text, 0, 0, 0, len(text), 0, PT_EOL}
+func InitParser(text string) *parserStruct {
+	return &parserStruct{text, 0, 0, 0, len(text), 0, PT_EOL}
 }
 
-func (p *Parser) next() {
+func (p *parserStruct) next() {
 	_, w := utf8.DecodeRuneInString(p.text[p.p:])
 	p.p += w
 	p.ln -= w
 }
 
-func (p *Parser) current() rune {
+func (p *parserStruct) current() rune {
 	r, _ := utf8.DecodeRuneInString(p.text[p.p:])
 	return r
 }
 
-func (p *Parser) token() (t string) {
+func (p *parserStruct) token() (t string) {
 	defer recover()
 	return p.text[p.start:p.end]
 }
 
-func (p *Parser) parseSep() string {
+func (p *parserStruct) parseSep() string {
 	p.start = p.p
 	for ; p.p < len(p.text); p.next() {
 		if !unicode.IsSpace(p.current()) {
@@ -54,7 +54,7 @@ func (p *Parser) parseSep() string {
 	return p.token()
 }
 
-func (p *Parser) parseEol() string {
+func (p *parserStruct) parseEol() string {
 	p.start = p.p
 
 	for ; p.p < len(p.text); p.next() {
@@ -70,7 +70,7 @@ func (p *Parser) parseEol() string {
 	return p.token()
 }
 
-func (p *Parser) parseCommand() string {
+func (p *parserStruct) parseCommand() string {
 	level, blevel := 1, 0
 	p.next() // skip
 	p.start = p.p
@@ -103,7 +103,7 @@ Loop:
 	return p.token()
 }
 
-func (p *Parser) parseVar() string {
+func (p *parserStruct) parseVar() string {
 	p.next() // skip the $
 	p.start = p.p
 
@@ -132,7 +132,7 @@ func (p *Parser) parseVar() string {
 	return p.token()
 }
 
-func (p *Parser) parseBrace() string {
+func (p *parserStruct) parseBrace() string {
 	level := 1
 	p.next() // skip
 	p.start = p.p
@@ -160,7 +160,7 @@ Loop:
 	return p.token()
 }
 
-func (p *Parser) parseString() string {
+func (p *parserStruct) parseString() string {
 	newword := p.Type == PT_SEP || p.Type == PT_EOL || p.Type == PT_STR
 
 	if c := p.current(); newword && c == '{' {
@@ -203,14 +203,14 @@ Loop:
 	return p.token()
 }
 
-func (p *Parser) parseComment() string {
+func (p *parserStruct) parseComment() string {
 	for p.ln != 0 && p.current() != '\n' {
 		p.next()
 	}
 	return p.token()
 }
 
-func (p *Parser) GetToken() string {
+func (p *parserStruct) GetToken() string {
 	for {
 		if p.ln == 0 {
 			if p.Type != PT_EOL && p.Type != PT_EOF {

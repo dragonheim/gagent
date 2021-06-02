@@ -20,8 +20,7 @@ import (
 	cty "github.com/zclconf/go-cty/cty"
 )
 
-// G'Agent version number.
-const VERSION = "0.0.1"
+const versionNum = "0.0.1"
 
 var exitCodes = struct {
 	m map[string]int
@@ -123,7 +122,7 @@ func main() {
 	 * Consume the usage variable and the command line arguments to create a
 	 * dictionary / map.
 	 */
-	opts, _ := docopt.ParseArgs(usage, nil, VERSION)
+	opts, _ := docopt.ParseArgs(usage, nil, versionNum)
 	log.Printf("[DEBUG] Arguments are %v\n", opts)
 
 	if opts["--config"] != nil {
