@@ -66,6 +66,8 @@ steps:
             ### Re-run the scan, but this time looking for critical vulnerabilities that we want to block for.
             - trivy image --skip-update --exit-code 1 --severity CRITICAL ${DRONE_REPO}:${DRONE_COMMIT}
 
+    # - name: Create Test Environment
+    #     image: dragonheim/terraform:latest
 
     - name: Notify Datadog That We Have Completed
         image: masci/drone-datadog
