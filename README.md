@@ -1,6 +1,10 @@
 # G'Agent
+[![Maintained Status](https://img.shields.io/maintenance/yes/2021?style=plastic)](https://git.dragonheim.net/dragonheim/gagent)
+[![License](https://img.shields.io/badge/License-MIT-limegreen.svg)](https://git.dragonheim.net/dragonheim/gagent/src/branch/main/LICENSE)
+
 [![Build Status](https://drone.dragonheim.net/api/badges/dragonheim/gagent/status.svg)](https://drone.dragonheim.net/dragonheim/gagent)
 [![Go Report Card](https://goreportcard.com/badge/git.dragonheim.net/dragonheim/gagent)](https://goreportcard.com/report/git.dragonheim.net/dragonheim/gagent)
+[![Docker Pulls](https://img.shields.io/docker/pulls/dragonheim/gagent)](https://hub.docker.com/r/dragonheim/gagent/tags?page=1&ordering=last_updated)
 
 A Golang based mobile agent system loosely inspired by the [Agent Tcl / D'Agents](http://www.cs.dartmouth.edu/~dfk/agents/) system created by Robert S. Gray of Dartmouth college.
 
