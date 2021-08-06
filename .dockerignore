@@ -83,4 +83,5 @@ override.tf.json
 .terraformrc
 terraform.rc
 
-
+# Ignore InSync temporary files
+*.insyncdl
