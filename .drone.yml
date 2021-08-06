@@ -11,8 +11,8 @@ clone:
 
 volumes:
     - name: dockersock
-        host:
-            path: /run/docker.sock
+      host:
+        path: /run/docker.sock
 
 steps:
     - name: Notify Datadog That We Are Starting

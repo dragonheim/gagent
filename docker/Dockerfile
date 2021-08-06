@@ -1,4 +1,4 @@
-FROM golang:1.16-alpine3.13 as builder
+FROM golang:1.16-alpine3.14 as builder
 
 WORKDIR /gagent
 COPY . .
@@ -12,7 +12,7 @@ RUN go build -o /gagent/bin/gagent gagent/main.go
 RUN strip /gagent/bin/gagent
 
 
-FROM alpine:3.13
+FROM alpine:3.14
 LABEL Name="G'Agent"
 LABEL Maintainer="jwells@dragonheim.net"
 LABEL License="MIT License"
