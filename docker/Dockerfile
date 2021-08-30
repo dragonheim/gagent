@@ -1,4 +1,4 @@
-FROM golang:1.16-alpine3.14 as builder
+FROM golang:1.17-alpine3.14 as builder
 
 WORKDIR /gagent
 COPY . .
@@ -10,7 +10,6 @@ ARG CGO_ENABLED=1
 RUN apk add --no-cache zeromq-dev build-base git
 RUN go build -o /gagent/bin/gagent gagent/main.go
 RUN strip /gagent/bin/gagent
-
 
 FROM alpine:3.14
 LABEL Name="G'Agent"
