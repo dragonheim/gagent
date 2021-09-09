@@ -53,13 +53,13 @@ steps:
       - trivy fs --skip-update --exit-code 1 --severity CRITICAL,HIGH .
 
       # Build new container image.
-      # - docker buildx build --push --platform linux/amd64 --progress plain --build-arg SEMVER="${DRONE_SEMVER:0.0.3}" -t ${DRONE_REPO}:${DRONE_COMMIT} -f docker/Dockerfile .
+      # - docker buildx build --push --platform linux/amd64 --progress plain --build-arg SEMVER="${DRONE_SEMVER##v:0.0.0}" -t ${DRONE_REPO}:${DRONE_SEMVER##v} -f docker/Dockerfile .
 
       # Perform image security check of lower level vulnerabilities. This will not break the build, we just want this information, just in case.
-      # - trivy image --skip-update --exit-code 0 --severity UNKNOWN,LOW,MEDIUM,HIGH ${DRONE_REPO}:${DRONE_COMMIT}
+      # - trivy image --skip-update --exit-code 0 --severity UNKNOWN,LOW,MEDIUM,HIGH ${DRONE_REPO}:${DRONE_SEMVER##v}
 
       # Perform image security check of higher level vulnerabilities. This can break the build.
-      # - trivy image --skip-update --exit-code 1 --severity CRITICAL ${DRONE_REPO}:${DRONE_COMMIT}
+      # - trivy image --skip-update --exit-code 1 --severity CRITICAL ${DRONE_REPO}:${DRONE_SEMVER##v}
 
   # name: Create Test Environment
   #     image: dragonheim/terraform:latest
