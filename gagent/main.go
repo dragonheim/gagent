@@ -20,7 +20,9 @@ import (
 	cty "github.com/zclconf/go-cty/cty"
 )
 
-const versionNum = "0.0.1"
+var (
+  semVER = "0.0.2"
+)
 
 var exitCodes = struct {
 	m map[string]int
@@ -106,15 +108,15 @@ func main() {
 	usage += "\n"
 
 	usage += "Arguments: \n"
-	usage += "  client   -- Start as a G'Agent client \n"
-	usage += "  router   -- Start as a G'Agent router \n"
-	usage += "  worker   -- Start as a G'Agent worker \n"
-	usage += "  setup    -- Write initial configuration file \n"
+	usage += "  client            -- Start as a G'Agent client \n"
+	usage += "  router            -- Start as a G'Agent router \n"
+	usage += "  worker            -- Start as a G'Agent worker \n"
+	usage += "  setup             -- Write initial configuration file \n"
 	usage += "\n"
 
 	usage += "Options:\n"
-	usage += "  -h --help         -- Show this help screen \n"
-	usage += "  --version         -- Show version \n"
+	usage += "  -h --help         -- Show this help screen and exit \n"
+	usage += "  --version         -- Show version and exit \n"
 	usage += "  --config=<config> -- [default: /etc/gagent/gagent.hcl] \n"
 	usage += "  --agent=<file>    -- filename of the agent to be uploaded to the G'Agent network \n"
 
@@ -122,7 +124,7 @@ func main() {
 	 * Consume the usage variable and the command line arguments to create a
 	 * dictionary / map.
 	 */
-	opts, _ := docopt.ParseArgs(usage, nil, versionNum)
+	opts, _ := docopt.ParseArgs(usage, nil, semVER)
 	log.Printf("[DEBUG] Arguments are %v\n", opts)
 
 	if opts["--config"] != nil {
