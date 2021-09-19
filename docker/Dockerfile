@@ -14,7 +14,7 @@ RUN go build -o /gagent/bin/gagent -ldflags "-X main.semVER=${SEMVER}" gagent/ma
 RUN strip /gagent/bin/gagent
 
 FROM alpine:3.14
-ARG vernum
+ARG SEMVER
 LABEL Name="G'Agent"
 LABEL Maintainer="jwells@dragonheim.net"
 LABEL License="MIT License"
