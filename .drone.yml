@@ -54,7 +54,7 @@ steps:
 
       # Build new container image.
       # - docker buildx build --push --platform linux/amd64 --progress plain --build-arg SEMVER="${DRONE_SEMVER}" -t "${DRONE_REPO}:latest" -t "${DRONE_REPO}:${DRONE_SEMVER}" -f docker/Dockerfile .
-      - docker buildx build --platform linux/amd64 --progress plain --build-arg SEMVER="dev" -t "${DRONE_REPO}:dev" -f docker/Dockerfile .
+      - docker buildx build --platform linux/amd64 --progress plain --build-arg SEMVER="dev" -t "${DRONE_REPO}:dev" -f assets/docker/Dockerfile .
 
       # Perform image security check of lower level vulnerabilities. This will not break the build, we just want this information, just in case.
       - trivy image --skip-update --exit-code 0 --severity UNKNOWN,LOW,MEDIUM,HIGH "${DRONE_REPO}:dev"
@@ -70,7 +70,7 @@ steps:
     environment:
       TRIVY_QUIET: true
     commands:
-      - cd tfenv
+      - cd assets/tfenv
       - terraform init
       - terraform plan
 
