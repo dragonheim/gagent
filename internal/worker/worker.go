@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	gs "git.dragonheim.net/dragonheim/gagent/src/gstructs"
+	gs "git.dragonheim.net/dragonheim/gagent/internal/gstructs"
 
 	// picol "git.dragonheim.net/dragonheim/gagent/src/picol"
 	zmq "github.com/pebbe/zmq4"

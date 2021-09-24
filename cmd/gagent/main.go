@@ -6,11 +6,11 @@ import (
 	"os"
 	"time"
 
-	gs "git.dragonheim.net/dragonheim/gagent/src/gstructs"
+	gs "git.dragonheim.net/dragonheim/gagent/internal/gstructs"
 
-	gc "git.dragonheim.net/dragonheim/gagent/src/client"
-	gr "git.dragonheim.net/dragonheim/gagent/src/router"
-	gw "git.dragonheim.net/dragonheim/gagent/src/worker"
+	gc "git.dragonheim.net/dragonheim/gagent/internal/client"
+	gr "git.dragonheim.net/dragonheim/gagent/internal/router"
+	gw "git.dragonheim.net/dragonheim/gagent/internal/worker"
 
 	docopt "github.com/aviddiviner/docopt-go"
 	hclsimple "github.com/hashicorp/hcl/v2/hclsimple"
@@ -21,7 +21,7 @@ import (
 )
 
 var (
-  semVER = "0.0.2"
+	semVER = "0.0.2"
 )
 
 var exitCodes = struct {
