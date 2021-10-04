@@ -12,7 +12,8 @@ import (
 )
 
 // Main is the initiation function for a Client
-func Main(config gs.GagentConfig, rid int, agent string) {
+func Main(wg *sync.WaitGroup, config gs.GagentConfig, rid int, agent string) {
+	defer wg.Done()
 	log.Printf("[INFO] Starting client\n")
 
 	// Generate connect string for this router.
@@ -51,4 +52,5 @@ func Main(config gs.GagentConfig, rid int, agent string) {
 	// 	}
 	// 	mu.Unlock()
 	// }
+	
 }

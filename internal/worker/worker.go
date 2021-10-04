@@ -3,6 +3,7 @@ package worker
 import (
 	"fmt"
 	"log"
+	"sync"
 
 	gs "git.dragonheim.net/dragonheim/gagent/internal/gstructs"
 
@@ -11,7 +12,8 @@ import (
 )
 
 // Main is the initiation function for a Worker
-func Main(config gs.GagentConfig, rid int) {
+func Main(wg *sync.WaitGroup, config gs.GagentConfig, rid int) {
+	defer wg.Done()
 	log.Printf("[INFO] Starting worker\n")
 
 	// Generate connect string for this router.

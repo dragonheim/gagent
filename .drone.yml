@@ -24,9 +24,13 @@ steps:
         - title: "Begin Build: ${DRONE_REPO}"
           text: "Build ${DRONE_BUILD_NUMBER}(${DRONE_COMMIT_LINK})"
           alert_type: "info"
+    when:
+      ref:
+        include:
+          - refs/tags/**
 
   - name: Validate code base and dependencies
-    image: dragonheim/golang:1.17.0
+    image: dragonheim/golang:1.17.1
     volumes:
       - name: dockersock
         path: /var/run/docker.sock
@@ -53,7 +57,6 @@ steps:
       - trivy fs --skip-update --exit-code 1 --severity CRITICAL,HIGH .
 
       # Build new container image.
-      # - docker buildx build --push --platform linux/amd64 --progress plain --build-arg SEMVER="${DRONE_SEMVER}" -t "${DRONE_REPO}:latest" -t "${DRONE_REPO}:${DRONE_SEMVER}" -f docker/Dockerfile .
       - docker buildx build --platform linux/amd64 --progress plain --build-arg SEMVER="dev" -t "${DRONE_REPO}:dev" -f assets/docker/Dockerfile .
 
       # Perform image security check of lower level vulnerabilities. This will not break the build, we just want this information, just in case.
@@ -62,17 +65,44 @@ steps:
       # Perform image security check of higher level vulnerabilities. This can break the build.
       - trivy image --skip-update --exit-code 1 --severity CRITICAL "${DRONE_REPO}:dev"
 
-  - name: Create Test Environment
-    image: dragonheim/terraform:latest
+  # - name: Create Test Environment
+  #   image: dragonheim/terraform:latest
+  #   volumes:
+  #     - name: dockersock
+  #       path: /var/run/docker.sock
+  #   environment:
+  #     TRIVY_QUIET: true
+  #   commands:
+  #     - cd assets/tfenv
+  #     - terraform init
+  #     - terraform plan
+
+  - name: Test application
+    image: "${DRONE_REPO}:dev"
     volumes:
       - name: dockersock
         path: /var/run/docker.sock
-    environment:
-      TRIVY_QUIET: true
     commands:
-      - cd assets/tfenv
-      - terraform init
-      - terraform plan
+      - echo "running"
+
+  - name: Build and push container
+    image: dragonheim/golang:1.17.1
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
+    when:
+      ref:
+        include:
+          - refs/tags/**
+    commands:
+      # Build new container image.
+      - docker buildx build --platform linux/amd64 --progress plain --build-arg SEMVER="${DRONE_SEMVER}" -t "${DRONE_REPO}:latest" -f docker/Dockerfile .
+
+      # Perform image security check of higher level vulnerabilities. This can break the build.
+      - trivy image --skip-update --exit-code 1 --severity CRITICAL "${DRONE_REPO}:latest"
+
+      # Push new build
+      - docker buildx build --push --platform linux/amd64 --progress plain --build-arg SEMVER="${DRONE_SEMVER}" -t "${DRONE_REPO}:latest" -t "${DRONE_REPO}:${DRONE_SEMVER}" -f docker/Dockerfile .
 
   - name: Notify Datadog That We Have Completed
     image: masci/drone-datadog

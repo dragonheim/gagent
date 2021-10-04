@@ -3,6 +3,7 @@ package router
 import (
 	"fmt"
 	"log"
+	"sync"
 
 	gs "git.dragonheim.net/dragonheim/gagent/internal/gstructs"
 
@@ -15,7 +16,8 @@ const (
 )
 
 // Main is the initiation function for a Router
-func Main(config gs.GagentConfig) {
+func Main(wg *sync.WaitGroup, config gs.GagentConfig) {
+	defer wg.Done()
 	log.Printf("[INFO] Starting router\n")
 
 	clientSock, _ := zmq.NewSocket(zmq.ROUTER)

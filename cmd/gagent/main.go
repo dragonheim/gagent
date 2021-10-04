@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"sync"
 	"time"
 
 	gs "git.dragonheim.net/dragonheim/gagent/internal/gstructs"
@@ -16,12 +17,14 @@ import (
 	hclsimple "github.com/hashicorp/hcl/v2/hclsimple"
 	hclwrite "github.com/hashicorp/hcl/v2/hclwrite"
 	logutils "github.com/hashicorp/logutils"
-	uuid "github.com/nu7hatch/gouuid"
+
+	uuid "github.com/jakehl/goid"
 	cty "github.com/zclconf/go-cty/cty"
 )
 
 var (
 	semVER = "0.0.2"
+	wg     sync.WaitGroup
 )
 
 var exitCodes = struct {
@@ -57,7 +60,8 @@ func main() {
 	 * This is used throughout the G'Agent system to uniquely identify this node.
 	 * It can be overridden in the configuration file by setting uuid
 	 */
-	identity, _ := uuid.NewV5(uuid.NamespaceURL, []byte("gagent"+config.Name))
+	// identity, _ := uuid.NewV5(uuid.NamespaceURL, []byte("gagent"+config.Name))
+	identity := uuid.NewV4UUID()
 	config.UUID = identity.String()
 
 	/*
@@ -181,7 +185,8 @@ func main() {
 			os.Exit(exitCodes.m["AGENT_LOAD_FAILED"])
 		}
 		for key := range config.Routers {
-			go gc.Main(config, key, string(agent))
+			wg.Add(1)
+			go gc.Main(&wg, config, key, string(agent))
 			time.Sleep(10 * time.Second)
 		}
 
@@ -200,8 +205,9 @@ func main() {
 			os.Exit(exitCodes.m["NO_WORKERS_DEFINED"])
 		}
 
-		go gr.Main(config)
-		select {}
+		wg.Add(1)
+		go gr.Main(&wg, config)
+		// select {}
 
 	case "worker":
 		/*
@@ -218,11 +224,12 @@ func main() {
 		}
 
 		for key := range config.Routers {
-			go gw.Main(config, key)
-			time.Sleep(10 * time.Second)
+			wg.Add(1)
+			go gw.Main(&wg, config, key)
+			// time.Sleep(10 * time.Second)
 		}
 
-		select {}
+		// select {}
 
 	case "setup":
 		log.Printf("[INFO] Running in setup mode\n")
@@ -247,5 +254,6 @@ func main() {
 		os.Exit(exitCodes.m["INVALID_MODE"])
 	}
 
+	wg.Wait()
 	os.Exit(exitCodes.m["SUCCESS"])
 }
