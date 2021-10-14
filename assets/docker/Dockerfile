@@ -1,5 +1,4 @@
-# FROM golang:1.17-alpine3.14 as builder
-FROM dragonheim/golang:1.17.1 as builder
+FROM golang:1.17-alpine3.14 as builder
 ARG SEMVER
 
 WORKDIR /gagent

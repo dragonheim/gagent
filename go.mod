@@ -10,6 +10,7 @@ require (
 	github.com/jakehl/goid v1.1.0
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/pebbe/zmq4 v1.2.7
+	github.com/prometheus/client_golang v1.11.0
 	github.com/zclconf/go-cty v1.8.3
 	golang.org/x/text v0.3.6 // indirect
 )

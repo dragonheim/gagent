@@ -1,10 +1,11 @@
 package client
 
 import (
-	"fmt"
-	"log"
-	"sync"
-	"time"
+	fmt "fmt"
+	log "log"
+	http "net/http"
+	sync "sync"
+	time "time"
 
 	gs "git.dragonheim.net/dragonheim/gagent/internal/gstructs"
 
@@ -52,5 +53,9 @@ func Main(wg *sync.WaitGroup, config gs.GagentConfig, rid int, agent string) {
 	// 	}
 	// 	mu.Unlock()
 	// }
-	
+
+}
+
+func pushAgent(config gs.GagentConfig) {
+	http.Get(config.Routers[0].RouterAddr)
 }

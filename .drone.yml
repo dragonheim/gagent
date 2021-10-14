@@ -30,7 +30,7 @@ steps:
           - refs/tags/**
 
   - name: Validate code base and dependencies
-    image: dragonheim/golang:1.17.1
+    image: dragonheim/golang:1.17
     volumes:
       - name: dockersock
         path: /var/run/docker.sock
@@ -66,7 +66,7 @@ steps:
       - trivy image --skip-update --exit-code 1 --severity CRITICAL "${DRONE_REPO}:dev"
 
   # - name: Create Test Environment
-  #   image: dragonheim/terraform:latest
+  #   image: dragonheim/terraform:1.0
   #   volumes:
   #     - name: dockersock
   #       path: /var/run/docker.sock
@@ -86,7 +86,7 @@ steps:
       - echo "running"
 
   - name: Build and push container
-    image: dragonheim/golang:1.17.1
+    image: dragonheim/golang:1.17
     volumes:
       - name: dockersock
         path: /var/run/docker.sock

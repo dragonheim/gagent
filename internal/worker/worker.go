@@ -1,9 +1,9 @@
 package worker
 
 import (
-	"fmt"
-	"log"
-	"sync"
+	fmt "fmt"
+	log "log"
+	sync "sync"
 
 	gs "git.dragonheim.net/dragonheim/gagent/internal/gstructs"
 

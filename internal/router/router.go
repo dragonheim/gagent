@@ -1,11 +1,14 @@
 package router
 
 import (
-	"fmt"
-	"log"
-	"sync"
+	fmt "fmt"
+	log "log"
+	http "net/http"
+	sync "sync"
 
 	gs "git.dragonheim.net/dragonheim/gagent/internal/gstructs"
+
+	promhttp "github.com/prometheus/client_golang/prometheus/promhttp"
 
 	zmq "github.com/pebbe/zmq4"
 )
@@ -26,7 +29,10 @@ func Main(wg *sync.WaitGroup, config gs.GagentConfig) {
 	workerSock, _ := zmq.NewSocket(zmq.DEALER)
 	defer workerSock.Close()
 
-	clientSock.Bind(fmt.Sprintf("tcp://%s:%d", config.ListenAddr, config.ClientPort))
+	http.Handle("/metrics", promhttp.Handler())
+	http.ListenAndServe(fmt.Sprintf(":%d", config.ClientPort), nil)
+
+	// clientSock.Bind(fmt.Sprintf("tcp://%s:%d", config.ListenAddr, config.ClientPort))
 	workerSock.Bind(fmt.Sprintf("tcp://%s:%d", config.ListenAddr, config.WorkerPort))
 
 	workers := make([]string, 0)
@@ -36,7 +42,7 @@ func Main(wg *sync.WaitGroup, config gs.GagentConfig) {
 
 	poller2 := zmq.NewPoller()
 	poller2.Add(workerSock, zmq.POLLIN)
-	poller2.Add(clientSock, zmq.POLLIN)
+	// poller2.Add(clientSock, zmq.POLLIN)
 
 LOOP:
 	for {
@@ -65,9 +71,9 @@ LOOP:
 				workers = append(workers, identity)
 
 				//  Forward message to client if it's not a READY
-				if msg[0] != WORKER_READY {
-					clientSock.SendMessage(msg)
-				}
+				// if msg[0] != WORKER_READY {
+				// 	clientSock.SendMessage(msg)
+				// }
 
 			case clientSock:
 				//  Get client request, route to first available worker
@@ -91,3 +97,28 @@ func unwrap(msg []string) (head string, tail []string) {
 	}
 	return
 }
+
+// func answerClient(w http.ResponseWriter, r *http.Request) {
+// 	if r.URL.Path != "/" {
+// 		http.NotFound(w, r)
+// 		return
+// 	}
+//
+// 	// Common code for all requests can go here...
+//
+// 	switch r.Method {
+// 	case http.MethodGet:
+// 		// Handle the GET request...
+//
+// 	case http.MethodPost:
+// 		// Handle the POST request...
+//
+// 	case http.MethodOptions:
+// 		w.Header().Set("Allow", "GET, POST, OPTIONS")
+// 		w.WriteHeader(http.StatusNoContent)
+//
+// 	default:
+// 		w.Header().Set("Allow", "GET, POST, OPTIONS")
+// 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+// 	}
+// }

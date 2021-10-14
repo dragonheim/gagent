@@ -1,11 +1,13 @@
 package main
 
 import (
-	"io/ioutil"
-	"log"
-	"os"
-	"sync"
-	"time"
+	fmt "fmt"
+	ioutil "io/ioutil"
+	log "log"
+	http "net/http"
+	os "os"
+	sync "sync"
+	time "time"
 
 	gs "git.dragonheim.net/dragonheim/gagent/internal/gstructs"
 
@@ -20,6 +22,8 @@ import (
 
 	uuid "github.com/jakehl/goid"
 	cty "github.com/zclconf/go-cty/cty"
+
+	promhttp "github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var (
@@ -157,6 +161,7 @@ func main() {
 			config.Mode = "worker"
 		}
 	}
+	config.Version = semVER
 	log.Printf("[DEBUG] Configuration is %v\n", config)
 
 	switch config.Mode {
@@ -184,6 +189,7 @@ func main() {
 			log.Printf("[ERROR] Failed to load Agent file: %s", opts["--agent"])
 			os.Exit(exitCodes.m["AGENT_LOAD_FAILED"])
 		}
+
 		for key := range config.Routers {
 			wg.Add(1)
 			go gc.Main(&wg, config, key, string(agent))
@@ -205,6 +211,9 @@ func main() {
 			os.Exit(exitCodes.m["NO_WORKERS_DEFINED"])
 		}
 
+		http.Handle("/metrics", promhttp.Handler())
+		http.ListenAndServe(fmt.Sprintf(":%d", config.ClientPort), nil)
+
 		wg.Add(1)
 		go gr.Main(&wg, config)
 		// select {}
@@ -222,6 +231,9 @@ func main() {
 			log.Printf("[ERROR] No routers defined.\n")
 			os.Exit(exitCodes.m["NO_ROUTERS_DEFINED"])
 		}
+
+		http.Handle("/metrics", promhttp.Handler())
+		http.ListenAndServe(fmt.Sprintf(":%d", config.ClientPort), nil)
 
 		for key := range config.Routers {
 			wg.Add(1)
