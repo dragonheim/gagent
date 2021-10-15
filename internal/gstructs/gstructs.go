@@ -13,6 +13,7 @@ type GagentConfig struct {
 	Routers    []*RouterDetails `hcl:"router,block"`
 	Workers    []*WorkerDetails `hcl:"worker,block"`
 	Version    string
+	File       string
 }
 
 // ClientDetails is details about known clients

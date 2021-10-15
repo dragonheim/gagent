@@ -1,10 +1,8 @@
 package main
 
 import (
-	fmt "fmt"
 	ioutil "io/ioutil"
 	log "log"
-	http "net/http"
 	os "os"
 	sync "sync"
 	time "time"
@@ -22,8 +20,6 @@ import (
 
 	uuid "github.com/jakehl/goid"
 	cty "github.com/zclconf/go-cty/cty"
-
-	promhttp "github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var (
@@ -48,13 +44,13 @@ var exitCodes = struct {
 func main() {
 	filter := &logutils.LevelFilter{
 		Levels:   []logutils.LogLevel{"DEBUG", "INFO", "WARN", "ERROR"},
-		MinLevel: logutils.LogLevel("WARN"),
+		MinLevel: logutils.LogLevel("DEBUG"),
 		Writer:   os.Stderr,
 	}
 	log.SetOutput(filter)
 
 	var config gs.GagentConfig
-	var configFile string = "/etc/gagent/gagent.hcl"
+	config.File = "/etc/gagent/gagent.hcl"
 
 	config.Name, _ = os.Hostname()
 	config.Mode = "setup"
@@ -64,7 +60,6 @@ func main() {
 	 * This is used throughout the G'Agent system to uniquely identify this node.
 	 * It can be overridden in the configuration file by setting uuid
 	 */
-	// identity, _ := uuid.NewV5(uuid.NamespaceURL, []byte("gagent"+config.Name))
 	identity := uuid.NewV4UUID()
 	config.UUID = identity.String()
 
@@ -127,6 +122,7 @@ func main() {
 	usage += "  --version         -- Show version and exit \n"
 	usage += "  --config=<config> -- [default: /etc/gagent/gagent.hcl] \n"
 	usage += "  --agent=<file>    -- filename of the agent to be uploaded to the G'Agent network \n"
+	usage += "\n"
 
 	/*
 	 * Consume the usage variable and the command line arguments to create a
@@ -136,7 +132,7 @@ func main() {
 	log.Printf("[DEBUG] Arguments are %v\n", opts)
 
 	if opts["--config"] != nil {
-		configFile = opts["--config"].(string)
+		config.File = opts["--config"].(string)
 	}
 
 	/*
@@ -145,9 +141,9 @@ func main() {
 	if opts["setup"] == true {
 		config.Mode = "setup"
 	} else {
-		err := hclsimple.DecodeFile(configFile, nil, &config)
+		err := hclsimple.DecodeFile(config.File, nil, &config)
 		if err != nil {
-			log.Printf("[ERROR] Failed to load configuration file: %s.\n", configFile)
+			log.Printf("[ERROR] Failed to load configuration file: %s.\n", config.File)
 			log.Printf("[ERROR] %s\n", err)
 			os.Exit(exitCodes.m["CONFIG_FILE_MISSING"])
 		}
@@ -211,12 +207,8 @@ func main() {
 			os.Exit(exitCodes.m["NO_WORKERS_DEFINED"])
 		}
 
-		http.Handle("/metrics", promhttp.Handler())
-		http.ListenAndServe(fmt.Sprintf(":%d", config.ClientPort), nil)
-
 		wg.Add(1)
 		go gr.Main(&wg, config)
-		// select {}
 
 	case "worker":
 		/*
@@ -232,16 +224,10 @@ func main() {
 			os.Exit(exitCodes.m["NO_ROUTERS_DEFINED"])
 		}
 
-		http.Handle("/metrics", promhttp.Handler())
-		http.ListenAndServe(fmt.Sprintf(":%d", config.ClientPort), nil)
-
 		for key := range config.Routers {
 			wg.Add(1)
 			go gw.Main(&wg, config, key)
-			// time.Sleep(10 * time.Second)
 		}
-
-		// select {}
 
 	case "setup":
 		log.Printf("[INFO] Running in setup mode\n")

@@ -18,7 +18,7 @@ func Main(wg *sync.WaitGroup, config gs.GagentConfig, rid int, agent string) {
 	log.Printf("[INFO] Starting client\n")
 
 	// Generate connect string for this router.
-	var rport = int64(config.ClientPort)
+	var rport = config.ClientPort
 	if config.Routers[rid].ClientPort != 0 {
 		rport = config.Routers[rid].ClientPort
 	}
@@ -41,7 +41,6 @@ func Main(wg *sync.WaitGroup, config gs.GagentConfig, rid int, agent string) {
 		mu.Unlock()
 	}()
 
-	//	time.Sleep(10 * time.Millisecond)
 	time.Sleep(10 * time.Millisecond)
 
 	// for {

@@ -3,6 +3,7 @@ package worker
 import (
 	fmt "fmt"
 	log "log"
+	http "net/http"
 	sync "sync"
 
 	gs "git.dragonheim.net/dragonheim/gagent/internal/gstructs"
@@ -25,6 +26,10 @@ func Main(wg *sync.WaitGroup, config gs.GagentConfig, rid int) {
 
 	subscriber, _ := zmq.NewSocket(zmq.REP)
 	defer subscriber.Close()
+
+	go func() {
+		http.ListenAndServe(fmt.Sprintf("%s:%d", config.ListenAddr, config.ClientPort), nil)
+	}()
 
 	log.Printf("[DEBUG] Attempting to connect to %s\n", connectString)
 	subscriber.Connect(connectString)

@@ -21,6 +21,9 @@ const (
 // Main is the initiation function for a Router
 func Main(wg *sync.WaitGroup, config gs.GagentConfig) {
 	defer wg.Done()
+	http.Handle("/metrics", promhttp.Handler())
+	http.HandleFunc("/hello", answerClient)
+
 	log.Printf("[INFO] Starting router\n")
 
 	clientSock, _ := zmq.NewSocket(zmq.ROUTER)
@@ -28,12 +31,14 @@ func Main(wg *sync.WaitGroup, config gs.GagentConfig) {
 
 	workerSock, _ := zmq.NewSocket(zmq.DEALER)
 	defer workerSock.Close()
+	workerListener := fmt.Sprintf("tcp://%s:%d", config.ListenAddr, config.WorkerPort)
+	clientListener := fmt.Sprintf("%s:%d", config.ListenAddr, config.ClientPort)
 
-	http.Handle("/metrics", promhttp.Handler())
-	http.ListenAndServe(fmt.Sprintf(":%d", config.ClientPort), nil)
+	go func() {
+		http.ListenAndServe(clientListener, nil)
+	}()
 
-	// clientSock.Bind(fmt.Sprintf("tcp://%s:%d", config.ListenAddr, config.ClientPort))
-	workerSock.Bind(fmt.Sprintf("tcp://%s:%d", config.ListenAddr, config.WorkerPort))
+	workerSock.Bind(workerListener)
 
 	workers := make([]string, 0)
 
@@ -42,7 +47,6 @@ func Main(wg *sync.WaitGroup, config gs.GagentConfig) {
 
 	poller2 := zmq.NewPoller()
 	poller2.Add(workerSock, zmq.POLLIN)
-	// poller2.Add(clientSock, zmq.POLLIN)
 
 LOOP:
 	for {
@@ -59,11 +63,13 @@ LOOP:
 		}
 		for _, socket := range sockets {
 			switch s := socket.Socket; s {
-			case workerSock: //  Handle worker activity on backend
+			case workerSock:
+				//  Handle worker activity on backend
 				//  Use worker identity for load-balancing
 				msg, err := s.RecvMessage(0)
 				if err != nil {
-					break LOOP //  Interrupted
+					//  Interrupted
+					break LOOP
 				}
 				var identity string
 				identity, msg = unwrap(msg)
@@ -98,27 +104,29 @@ func unwrap(msg []string) (head string, tail []string) {
 	return
 }
 
-// func answerClient(w http.ResponseWriter, r *http.Request) {
-// 	if r.URL.Path != "/" {
-// 		http.NotFound(w, r)
-// 		return
-// 	}
-//
-// 	// Common code for all requests can go here...
-//
-// 	switch r.Method {
-// 	case http.MethodGet:
-// 		// Handle the GET request...
-//
-// 	case http.MethodPost:
-// 		// Handle the POST request...
-//
-// 	case http.MethodOptions:
-// 		w.Header().Set("Allow", "GET, POST, OPTIONS")
-// 		w.WriteHeader(http.StatusNoContent)
-//
-// 	default:
-// 		w.Header().Set("Allow", "GET, POST, OPTIONS")
-// 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-// 	}
-// }
+func answerClient(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		fmt.Fprintf(w, "%v\n", r)
+		// http.NotFound(w, r)
+		return
+	}
+
+	// Common code for all requests can go here...
+
+	switch r.Method {
+	case http.MethodGet:
+		fmt.Fprintf(w, "%v\n", r)
+		// Handle the GET request...
+
+	case http.MethodPost:
+		// Handle the POST request...
+
+	case http.MethodOptions:
+		w.Header().Set("Allow", "GET, POST, OPTIONS")
+		w.WriteHeader(http.StatusNoContent)
+
+	default:
+		w.Header().Set("Allow", "GET, POST, OPTIONS")
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+	}
+}
