@@ -8,7 +8,8 @@ import (
 
 	gs "git.dragonheim.net/dragonheim/gagent/internal/gstructs"
 
-	promhttp "github.com/prometheus/client_golang/prometheus/promhttp"
+	prometheus "github.com/prometheus/client_golang/prometheus"
+	promauto "github.com/prometheus/client_golang/prometheus/promauto"
 
 	zmq "github.com/pebbe/zmq4"
 )
@@ -18,10 +19,21 @@ const (
 	WORKER_READY = "\001" //  Signals worker is ready
 )
 
-// Main is the initiation function for a Router
+var (
+	opsProcessed = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "client_requests_recieved",
+	})
+)
+
+/*
+ The 'router' processes routing requests from the agent.  The router does
+ not handle any of the agent activities beyond processing the agent's
+ list of tags and passing the agent and it's storage to either a member
+ or client node. Tags are used by the agent to give hints as to where
+ it should be routed.
+*/
 func Main(wg *sync.WaitGroup, config gs.GagentConfig) {
 	defer wg.Done()
-	http.Handle("/metrics", promhttp.Handler())
 	http.HandleFunc("/hello", answerClient)
 
 	log.Printf("[INFO] Starting router\n")
@@ -31,13 +43,8 @@ func Main(wg *sync.WaitGroup, config gs.GagentConfig) {
 
 	workerSock, _ := zmq.NewSocket(zmq.DEALER)
 	defer workerSock.Close()
+
 	workerListener := fmt.Sprintf("tcp://%s:%d", config.ListenAddr, config.WorkerPort)
-	clientListener := fmt.Sprintf("%s:%d", config.ListenAddr, config.ClientPort)
-
-	go func() {
-		http.ListenAndServe(clientListener, nil)
-	}()
-
 	workerSock.Bind(workerListener)
 
 	workers := make([]string, 0)
@@ -106,8 +113,8 @@ func unwrap(msg []string) (head string, tail []string) {
 
 func answerClient(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
-		fmt.Fprintf(w, "%v\n", r)
-		// http.NotFound(w, r)
+		// fmt.Fprintf(w, "%v\n", r)
+		http.NotFound(w, r)
 		return
 	}
 
@@ -115,6 +122,7 @@ func answerClient(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
+		opsProcessed.Inc()
 		fmt.Fprintf(w, "%v\n", r)
 		// Handle the GET request...
 

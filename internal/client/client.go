@@ -12,7 +12,13 @@ import (
 	zmq "github.com/pebbe/zmq4"
 )
 
-// Main is the initiation function for a Client
+/*
+ Client mode will send an agent file to a router for processing
+ Clients do not process the agent files, only send them as
+ requests to a router. If started without arguments, the client
+ will contact the router and attempt to retrieve the results
+ of it's most recent request.
+*/
 func Main(wg *sync.WaitGroup, config gs.GagentConfig, rid int, agent string) {
 	defer wg.Done()
 	log.Printf("[INFO] Starting client\n")

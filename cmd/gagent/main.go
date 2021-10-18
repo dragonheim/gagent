@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	ioutil "io/ioutil"
 	log "log"
+	http "net/http"
 	os "os"
 	sync "sync"
 	time "time"
@@ -13,18 +15,26 @@ import (
 	gr "git.dragonheim.net/dragonheim/gagent/internal/router"
 	gw "git.dragonheim.net/dragonheim/gagent/internal/worker"
 
+	cty "github.com/zclconf/go-cty/cty"
+
 	docopt "github.com/aviddiviner/docopt-go"
+
 	hclsimple "github.com/hashicorp/hcl/v2/hclsimple"
 	hclwrite "github.com/hashicorp/hcl/v2/hclwrite"
+
 	logutils "github.com/hashicorp/logutils"
 
+	promhttp "github.com/prometheus/client_golang/prometheus/promhttp"
+
 	uuid "github.com/jakehl/goid"
-	cty "github.com/zclconf/go-cty/cty"
 )
 
 var (
 	semVER = "0.0.2"
-	wg     sync.WaitGroup
+)
+
+var (
+	wg sync.WaitGroup
 )
 
 var exitCodes = struct {
@@ -48,6 +58,8 @@ func main() {
 		Writer:   os.Stderr,
 	}
 	log.SetOutput(filter)
+
+	http.Handle("/metrics", promhttp.Handler())
 
 	var config gs.GagentConfig
 	config.File = "/etc/gagent/gagent.hcl"
@@ -136,6 +148,13 @@ func main() {
 	}
 
 	/*
+	 * Start Prometheus metrics exporter
+	 */
+	go func() {
+		http.ListenAndServe(fmt.Sprintf("%s:%d", config.ListenAddr, config.ClientPort), nil)
+	}()
+
+	/*
 	 * Let the command line mode override the configuration.
 	 */
 	if opts["setup"] == true {
@@ -162,13 +181,6 @@ func main() {
 
 	switch config.Mode {
 	case "client":
-		/*
-		 * Client mode will send an agent file to a router for processing
-		 * Clients do not process the agent files, only send them as
-		 * requests to a router. If started without arguments, the client
-		 * will contact the router and attempt to retrieve the results
-		 * of it's most recent request.
-		 */
 		log.Printf("[INFO] Running in client mode\n")
 
 		if len(config.Routers) == 0 {
@@ -193,13 +205,6 @@ func main() {
 		}
 
 	case "router":
-		/*
-		 * The 'router' processes routing requests from the agent.  The router does
-		 * not handle any of the agent activities beyond processing the agent's
-		 * list of tags and passing the agent and it's storage to either a member
-		 * or client node. Tags are used by the agent to give hints as to where
-		 * it should be routed.
-		 */
 		log.Printf("[INFO] Running in router mode\n")
 
 		if len(config.Workers) == 0 {
@@ -211,12 +216,6 @@ func main() {
 		go gr.Main(&wg, config)
 
 	case "worker":
-		/*
-		 * The 'worker' processes the agent code. The worker nodes do not know
-		 * anything about the network structure. Instead they know only to which
-		 * router(s) they are connected. The worker will execute the agent code and
-		 * pass the agent and it's results to a router.
-		 */
 		log.Printf("[INFO] Running in worker mode\n")
 
 		if len(config.Routers) == 0 {
