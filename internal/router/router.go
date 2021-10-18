@@ -14,11 +14,6 @@ import (
 	zmq "github.com/pebbe/zmq4"
 )
 
-// @TODO -- This was documented in the example, and I am unclear what it does
-const (
-	WORKER_READY = "\001" //  Signals worker is ready
-)
-
 var (
 	opsProcessed = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "client_requests_recieved",
@@ -83,11 +78,6 @@ LOOP:
 				log.Printf("[DEBUG] Worker message received: %s", msg)
 				workers = append(workers, identity)
 
-				//  Forward message to client if it's not a READY
-				// if msg[0] != WORKER_READY {
-				// 	clientSock.SendMessage(msg)
-				// }
-
 			case clientSock:
 				//  Get client request, route to first available worker
 				msg, err := s.RecvMessage(0)
@@ -113,6 +103,7 @@ func unwrap(msg []string) (head string, tail []string) {
 
 func answerClient(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
+		opsProcessed.Inc()
 		// fmt.Fprintf(w, "%v\n", r)
 		http.NotFound(w, r)
 		return
@@ -122,7 +113,6 @@ func answerClient(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		opsProcessed.Inc()
 		fmt.Fprintf(w, "%v\n", r)
 		// Handle the GET request...
 
