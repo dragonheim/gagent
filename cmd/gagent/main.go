@@ -1,13 +1,14 @@
 package main
 
 import (
-	"fmt"
+	fmt "fmt"
 	ioutil "io/ioutil"
 	log "log"
 	http "net/http"
 	os "os"
 	sync "sync"
-	time "time"
+
+	autorestart "github.com/slayer/autorestart"
 
 	gs "git.dragonheim.net/dragonheim/gagent/internal/gstructs"
 
@@ -51,7 +52,12 @@ var exitCodes = struct {
 	"AGENT_NOT_DEFINED":   8,
 }}
 
+var config gs.GagentConfig
+
 func main() {
+	autorestart.StartWatcher()
+	http.Handle("/metrics", promhttp.Handler())
+
 	filter := &logutils.LevelFilter{
 		Levels:   []logutils.LogLevel{"DEBUG", "INFO", "WARN", "ERROR"},
 		MinLevel: logutils.LogLevel("DEBUG"),
@@ -59,48 +65,46 @@ func main() {
 	}
 	log.SetOutput(filter)
 
-	http.Handle("/metrics", promhttp.Handler())
+	var agent gs.Agent
+	// config.File = "/etc/gagent/gagent.hcl"
 
-	var config gs.GagentConfig
-	config.File = "/etc/gagent/gagent.hcl"
-
-	config.Name, _ = os.Hostname()
-	config.Mode = "setup"
+	// config.Name, _ = os.Hostname()
+	// config.Mode = "setup"
 
 	/*
 	 * Set a default UUID for this node.
 	 * This is used throughout the G'Agent system to uniquely identify this node.
 	 * It can be overridden in the configuration file by setting uuid
 	 */
-	identity := uuid.NewV4UUID()
-	config.UUID = identity.String()
+	// identity := uuid.NewV4UUID()
+	// config.UUID = identity.String()
 
 	/*
 	 * By default, we want to listen on all IP addresses. It can be overridden
 	 * in the configuration file by setting listenaddr
 	 */
-	config.ListenAddr = "0.0.0.0"
+	// config.ListenAddr = "0.0.0.0"
 
 	/*
 	 * By default, G'Agent client will use port 35571 to communicate with the
 	 * routers, but you can override it by setting the clientport in the
 	 * configuration file
 	 */
-	config.ClientPort = 35571
+	// config.ClientPort = 35571
 
 	/*
 	 * By default, G'Agent router will use port 35572 to communicate with
 	 * other routers, but you can override it by setting the routerport in
 	 * the configuration file
 	 */
-	config.RouterPort = 35570
+	// config.RouterPort = 35570
 
 	/*
 	 * By default, G'Agent worker will use port 35570 to communicate with the
 	 * routers, but you can override it by setting the workerport in the
 	 * configuration file
 	 */
-	config.WorkerPort = 35572
+	// config.WorkerPort = 35572
 
 	/*
 	 * Create a usage variable and then use that to declare the arguments and
@@ -115,7 +119,7 @@ func main() {
 	usage += "\n"
 
 	usage += "Usage: \n"
-	usage += "  gagent client [--config=<config>] [--agent=<file>] \n"
+	usage += "  gagent client (pull|push) [--config=<config>] [--agent=<file>] \n"
 	usage += "  gagent router [--config=<config>] \n"
 	usage += "  gagent worker [--config=<config>] \n"
 	usage += "  gagent setup [--config=<config>] \n"
@@ -123,7 +127,8 @@ func main() {
 	usage += "\n"
 
 	usage += "Arguments: \n"
-	usage += "  client            -- Start as a G'Agent client \n"
+	usage += "  client pull       -- Start as a G'Agent client to pull agent results \n"
+	usage += "  client push       -- Start as a G'Agent client to push agent \n"
 	usage += "  router            -- Start as a G'Agent router \n"
 	usage += "  worker            -- Start as a G'Agent worker \n"
 	usage += "  setup             -- Write initial configuration file \n"
@@ -133,7 +138,7 @@ func main() {
 	usage += "  -h --help         -- Show this help screen and exit \n"
 	usage += "  --version         -- Show version and exit \n"
 	usage += "  --config=<config> -- [default: /etc/gagent/gagent.hcl] \n"
-	usage += "  --agent=<file>    -- filename of the agent to be uploaded to the G'Agent network \n"
+	usage += "  --agent=<file>    -- filename of the agent to be uploaded to the G'Agent network. Required in push mode \n"
 	usage += "\n"
 
 	/*
@@ -143,6 +148,7 @@ func main() {
 	opts, _ := docopt.ParseArgs(usage, nil, semVER)
 	log.Printf("[DEBUG] Arguments are %v\n", opts)
 
+	log.Printf("[DEBUG] Config is %v\n", config)
 	if opts["--config"] != nil {
 		config.File = opts["--config"].(string)
 	}
@@ -150,9 +156,7 @@ func main() {
 	/*
 	 * Start Prometheus metrics exporter
 	 */
-	go func() {
-		http.ListenAndServe(fmt.Sprintf("%s:%d", config.ListenAddr, config.ClientPort), nil)
-	}()
+	go http.ListenAndServe(fmt.Sprintf("%s:%d", config.ListenAddr, config.ClientPort), nil)
 
 	/*
 	 * Let the command line mode override the configuration.
@@ -162,12 +166,17 @@ func main() {
 	} else {
 		err := hclsimple.DecodeFile(config.File, nil, &config)
 		if err != nil {
-			log.Printf("[ERROR] Failed to load configuration file: %s.\n", config.File)
-			log.Printf("[ERROR] %s\n", err)
+			log.Printf("[ERROR] Failed to load configuration file: %s.\n%s\n", config.File, err)
 			os.Exit(exitCodes.m["CONFIG_FILE_MISSING"])
 		}
 		if opts["client"] == true {
 			config.Mode = "client"
+			if opts["pull"] == true {
+				config.CMode = false
+			}
+			if opts["push"] == true {
+				config.CMode = true
+			}
 		}
 		if opts["router"] == true {
 			config.Mode = "router"
@@ -192,17 +201,19 @@ func main() {
 			log.Printf("[ERROR] Agent file not specified")
 			os.Exit(exitCodes.m["AGENT_NOT_DEFINED"])
 		}
-		agent, err := ioutil.ReadFile(opts["--agent"].(string))
-		if err != nil {
-			log.Printf("[ERROR] Failed to load Agent file: %s", opts["--agent"])
-			os.Exit(exitCodes.m["AGENT_LOAD_FAILED"])
+
+		// var agent []byte
+		var err error
+		if config.CMode {
+			agent.ScriptCode, err = ioutil.ReadFile(opts["--agent"].(string))
+			if err != nil {
+				log.Printf("[ERROR] Failed to load Agent file: %s", opts["--agent"])
+				os.Exit(exitCodes.m["AGENT_LOAD_FAILED"])
+			}
 		}
 
-		for key := range config.Routers {
-			wg.Add(1)
-			go gc.Main(&wg, config, key, string(agent))
-			time.Sleep(10 * time.Second)
-		}
+		wg.Add(1)
+		go gc.Main(&wg, config, string(agent.ScriptCode))
 
 	case "router":
 		log.Printf("[INFO] Running in router mode\n")
@@ -223,17 +234,15 @@ func main() {
 			os.Exit(exitCodes.m["NO_ROUTERS_DEFINED"])
 		}
 
-		for key := range config.Routers {
-			wg.Add(1)
-			go gw.Main(&wg, config, key)
-		}
+		wg.Add(1)
+		go gw.Main(&wg, config)
 
 	case "setup":
 		log.Printf("[INFO] Running in setup mode\n")
 		f := hclwrite.NewEmptyFile()
 		rootBody := f.Body()
 		rootBody.SetAttributeValue("name", cty.StringVal(config.Name))
-		rootBody.SetAttributeValue("mode", cty.StringVal("client"))
+		rootBody.SetAttributeValue("mode", cty.StringVal(config.Mode))
 		rootBody.SetAttributeValue("uuid", cty.StringVal(config.UUID))
 		rootBody.AppendNewline()
 
@@ -253,4 +262,31 @@ func main() {
 
 	wg.Wait()
 	os.Exit(exitCodes.m["SUCCESS"])
+}
+
+func init() {
+	// Initialize the configuration
+	config.Mode = "setup"
+	config.Name, _ = os.Hostname()
+	config.UUID = uuid.NewV4UUID().String()
+	config.ListenAddr = "0.0.0.0"
+	config.ClientPort = 35571
+	config.RouterPort = 35570
+	config.WorkerPort = 35572
+	config.Clients = make([]*gs.ClientDetails, 0)
+	config.Routers = make([]*gs.RouterDetails, 0)
+	config.Workers = make([]*gs.WorkerDetails, 0)
+	config.File = "/etc/gagent/gagent.hcl"
+	config.Version = semVER
+
+	// Initialize the exit codes
+	// exitCodes.m = make(map[string]int)
+	exitCodes.m["SUCCESS"] = 0
+	exitCodes.m["INVALID_MODE"] = 1
+	exitCodes.m["CONFIG_FILE_MISSING"] = 2
+	exitCodes.m["NO_ROUTERS_DEFINED"] = 3
+	exitCodes.m["NO_WORKERS_DEFINED"] = 4
+	exitCodes.m["AGENT_NOT_DEFINED"] = 5
+	exitCodes.m["AGENT_LOAD_FAILED"] = 6
+
 }

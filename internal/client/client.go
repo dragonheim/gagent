@@ -3,7 +3,6 @@ package client
 import (
 	fmt "fmt"
 	log "log"
-	http "net/http"
 	sync "sync"
 	time "time"
 
@@ -19,48 +18,38 @@ import (
  will contact the router and attempt to retrieve the results
  of it's most recent request.
 */
-func Main(wg *sync.WaitGroup, config gs.GagentConfig, rid int, agent string) {
+func Main(wg *sync.WaitGroup, config gs.GagentConfig, agent string) {
 	defer wg.Done()
 	log.Printf("[INFO] Starting client\n")
 
-	// Generate connect string for this router.
-	var rport = config.ClientPort
-	if config.Routers[rid].ClientPort != 0 {
-		rport = config.Routers[rid].ClientPort
-	}
-	connectString := fmt.Sprintf("tcp://%s:%d", config.Routers[rid].RouterAddr, rport)
-	log.Printf("[DEBUG] Attempting to connect to %s\n", connectString)
+	for key := range config.Routers {
+		// Generate connect string for this router.
+		rport := config.ClientPort
+		if config.Routers[key].ClientPort != 0 {
+			rport = config.Routers[key].ClientPort
+		}
+		connectString := fmt.Sprintf("tcp://%s:%d", config.Routers[key].RouterAddr, rport)
 
+		wg.Add(1)
+		go sendAgent(wg, config.UUID, connectString, agent)
+		time.Sleep(10 * time.Millisecond)
+	}
+}
+
+func sendAgent(wg *sync.WaitGroup, uuid string, connectString string, agent string) {
+	log.Printf("[DEBUG] Attempting to connect to %s\n", connectString)
+	defer wg.Done()
 	var mu sync.Mutex
+	mu.Lock()
 
 	sock, _ := zmq.NewSocket(zmq.REQ)
 	defer sock.Close()
 
-	sock.SetIdentity(config.UUID)
+	sock.SetIdentity(uuid)
 	sock.Connect(connectString)
 
-	go func() {
-		mu.Lock()
-		log.Printf("[DEBUG] Start sending agent...\n")
-		sock.SendMessage(agent)
-		log.Printf("[DEBUG] End sending agent...\n")
-		mu.Unlock()
-	}()
-
-	time.Sleep(10 * time.Millisecond)
-
-	// for {
-	// 	time.Sleep(10 * time.Millisecond)
-	// 	mu.Lock()
-	// 	msg, err := sock.RecvMessage(zmq.DONTWAIT)
-	// 	if err == nil {
-	// 		log.Println(msg[0], config.UUID)
-	// 	}
-	// 	mu.Unlock()
-	// }
-
-}
-
-func pushAgent(config gs.GagentConfig) {
-	http.Get(config.Routers[0].RouterAddr)
+	log.Printf("[DEBUG] Start sending agent...\n")
+	sock.SendMessage(agent)
+	log.Printf("[DEBUG] End sending agent...\n")
+	mu.Unlock()
 }

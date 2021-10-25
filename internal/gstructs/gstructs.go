@@ -14,6 +14,13 @@ type GagentConfig struct {
 	Workers    []*WorkerDetails `hcl:"worker,block"`
 	Version    string
 	File       string
+	CMode      bool
+}
+
+type Agent struct {
+	Client     string
+	ScriptCode []byte
+	Hints      []*string
 }
 
 // ClientDetails is details about known clients

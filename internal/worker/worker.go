@@ -3,16 +3,22 @@ package worker
 import (
 	fmt "fmt"
 	log "log"
-	http "net/http"
 	sync "sync"
 
 	gs "git.dragonheim.net/dragonheim/gagent/internal/gstructs"
 
 	// picol "git.dragonheim.net/dragonheim/gagent/src/picol"
 
-	promhttp "github.com/prometheus/client_golang/prometheus/promhttp"
+	prometheus "github.com/prometheus/client_golang/prometheus"
+	promauto "github.com/prometheus/client_golang/prometheus/promauto"
 
 	zmq "github.com/pebbe/zmq4"
+)
+
+var (
+	opsProcessed = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "agent_requests_collected",
+	})
 )
 
 /*
@@ -21,29 +27,33 @@ import (
  router(s) they are connected. The worker will execute the agent code and
  pass the agent and it's results to a router.
 */
-func Main(wg *sync.WaitGroup, config gs.GagentConfig, rid int) {
+func Main(wg *sync.WaitGroup, config gs.GagentConfig) {
 	defer wg.Done()
-	http.Handle("/metrics", promhttp.Handler())
-
 	log.Printf("[INFO] Starting worker\n")
 
-	// Generate connect string for this router.
-	var rport = config.WorkerPort
-	if config.Routers[rid].WorkerPort != 0 {
-		rport = config.Routers[rid].WorkerPort
+	for key := range config.Routers {
+		rport := config.WorkerPort
+		if config.Routers[key].WorkerPort != 0 {
+			rport = config.Routers[key].WorkerPort
+		}
+
+		// Generate connect string for this router.
+		connectString := fmt.Sprintf("tcp://%s:%d", config.Routers[key].RouterAddr, rport)
+
+		wg.Add(1)
+		go getAgent(wg, config.UUID, connectString)
 	}
-	connectString := fmt.Sprintf("tcp://%s:%d", config.Routers[rid].RouterAddr, rport)
 	// workerListener := fmt.Sprintf("tcp://%s:%d", config.ListenAddr, config.WorkerPort)
-	clientListener := fmt.Sprintf("%s:%d", config.ListenAddr, config.ClientPort)
+
+}
+
+func getAgent(wg *sync.WaitGroup, uuid string, connectString string) {
+	log.Printf("[DEBUG] Attempting to connect to %s\n", connectString)
+	defer wg.Done()
 
 	subscriber, _ := zmq.NewSocket(zmq.REP)
 	defer subscriber.Close()
 
-	go func() {
-		http.ListenAndServe(clientListener, nil)
-	}()
-
-	log.Printf("[DEBUG] Attempting to connect to %s\n", connectString)
 	subscriber.Connect(connectString)
 
 	msg, err := subscriber.Recv(0)
