@@ -73,7 +73,7 @@ type RouterDetails struct {
 	 * on for routers. If not defined, it will default
 	 * to 35570.
 	 */
-	RouterPort int64 `hcl:"workerport,optional"`
+	RouterPort int64 `hcl:"routerport,optional"`
 
 	/*
 	 * This is the is the port that the router listens
