@@ -43,17 +43,7 @@ var (
 
 var exitCodes = struct {
 	m map[string]int
-}{m: map[string]int{
-	"SUCCESS":             0,
-	"CONFIG_FILE_MISSING": 1,
-	"SETUP_FAILED":        2,
-	"INVALID_MODE":        3,
-	"AGENT_LOAD_FAILED":   4,
-	"AGENT_MISSING_TAGS":  5,
-	"NO_ROUTERS_DEFINED":  6,
-	"NO_WORKERS_DEFINED":  7,
-	"AGENT_NOT_DEFINED":   8,
-}}
+}{m: map[string]int{}}
 
 var config gs.GagentConfig
 var agent gs.AgentDetails
@@ -121,6 +111,15 @@ func main() {
 		rootBody.SetAttributeValue("name", cty.StringVal(config.Name))
 		rootBody.SetAttributeValue("mode", cty.StringVal(config.Mode))
 		rootBody.SetAttributeValue("uuid", cty.StringVal(config.UUID))
+		rootBody.SetAttributeValue("listenaddr", cty.StringVal("0.0.0.0"))
+		rootBody.SetAttributeValue("clientport", cty.NumberIntVal(config.ClientPort))
+		rootBody.SetAttributeValue("routerport", cty.NumberIntVal(config.RouterPort))
+		rootBody.SetAttributeValue("workerport", cty.NumberIntVal(config.WorkerPort))
+		rootBody.AppendNewline()
+
+		clientBlock1 := rootBody.AppendNewBlock("client", []string{config.Name})
+		clientBody1 := clientBlock1.Body()
+		clientBody1.SetAttributeValue("clientid", cty.StringVal(config.UUID))
 		rootBody.AppendNewline()
 
 		routerBlock1 := rootBody.AppendNewBlock("router", []string{config.Name})
@@ -128,6 +127,13 @@ func main() {
 		routerBody1.SetAttributeValue("routerid", cty.StringVal(config.UUID))
 		routerBody1.SetAttributeValue("address", cty.StringVal("127.0.0.1"))
 		routerBody1.SetAttributeValue("clientport", cty.NumberIntVal(config.ClientPort))
+		routerBody1.SetAttributeValue("routerport", cty.NumberIntVal(config.RouterPort))
+		routerBody1.SetAttributeValue("workerport", cty.NumberIntVal(config.WorkerPort))
+		rootBody.AppendNewline()
+
+		workerBlock1 := rootBody.AppendNewBlock("worker", []string{config.Name})
+		workerBody1 := workerBlock1.Body()
+		workerBody1.SetAttributeValue("workerid", cty.StringVal(config.UUID))
 		rootBody.AppendNewline()
 
 		log.Printf("\n%s", f.Bytes())
@@ -164,6 +170,8 @@ func init() {
 	exitCodes.m["NO_WORKERS_DEFINED"] = 4
 	exitCodes.m["AGENT_NOT_DEFINED"] = 5
 	exitCodes.m["AGENT_LOAD_FAILED"] = 6
+	exitCodes.m["AGENT_MISSING_TAGS"] = 7
+	exitCodes.m["AGENT_NOT_DEFINED"] = 8
 
 	/*
 	 * Initialize the configuration
@@ -293,6 +301,7 @@ func init() {
 		if opts["router"] == true {
 			config.Mode = "router"
 		}
+
 		if opts["worker"] == true {
 			config.Mode = "worker"
 		}
