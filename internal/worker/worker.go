@@ -37,7 +37,9 @@ func Main(wg *sync.WaitGroup, config gs.GagentConfig) {
 			rport = config.Routers[key].WorkerPort
 		}
 
-		// Generate connect string for this router.
+		/*
+		 * Generate connect string for this router.
+		 */
 		connectString := fmt.Sprintf("tcp://%s:%d", config.Routers[key].RouterAddr, rport)
 
 		wg.Add(1)

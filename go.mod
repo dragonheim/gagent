@@ -3,6 +3,7 @@ module git.dragonheim.net/dragonheim/gagent
 go 1.16
 
 require (
+	github.com/Showmax/go-fqdn v1.0.0
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/aviddiviner/docopt-go v0.0.0-20170807220726-d8a1d67efc6a
 	github.com/hashicorp/hcl/v2 v2.10.1

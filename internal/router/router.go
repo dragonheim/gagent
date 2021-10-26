@@ -52,7 +52,9 @@ func Main(wg *sync.WaitGroup, config gs.GagentConfig) {
 
 LOOP:
 	for {
-		//  Poll frontend only if we have available workers
+		/*
+		 *  Poll frontend only if we have available workers
+		 */
 		var sockets []zmq.Polled
 		var err error
 		if len(workers) > 0 {
@@ -61,16 +63,23 @@ LOOP:
 			sockets, err = poller1.Poll(-1)
 		}
 		if err != nil {
-			break //  Interrupted
+			/*
+			 *  Interrupt
+			 */
+			break
 		}
 		for _, socket := range sockets {
 			switch s := socket.Socket; s {
 			case workerSock:
-				//  Handle worker activity on backend
-				//  Use worker identity for load-balancing
+				/*
+				 *  Handle worker activity on backend
+				 *  Use worker identity for load-balancing
+				 */
 				msg, err := s.RecvMessage(0)
 				if err != nil {
-					//  Interrupted
+					/*
+					 *  Interrupt
+					 */
 					break LOOP
 				}
 				var identity string
@@ -79,7 +88,9 @@ LOOP:
 				workers = append(workers, identity)
 
 			case clientSock:
-				//  Get client request, route to first available worker
+				/*
+				 *  Get client request, route to first available worker
+				 */
 				msg, err := s.RecvMessage(0)
 				log.Printf("[DEBUG] Client message received: %s", msg)
 				if err == nil {
@@ -109,20 +120,32 @@ func answerClient(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Common code for all requests can go here...
-
+	/*
+	 * Common code for all requests can go here...
+	 */
 	switch r.Method {
+	/*
+	 * Handle GET requests
+	 */
 	case http.MethodGet:
 		fmt.Fprintf(w, "%v\n", r)
-		// Handle the GET request...
 
+	/*
+	 * Handle POST requests
+	 */
 	case http.MethodPost:
-		// Handle the POST request...
+		fmt.Fprintf(w, "%v\n", r)
 
+	/*
+	 * Handle PUT requests
+	 */
 	case http.MethodOptions:
 		w.Header().Set("Allow", "GET, POST, OPTIONS")
 		w.WriteHeader(http.StatusNoContent)
 
+	/*
+	 * Handle everything else
+	 */
 	default:
 		w.Header().Set("Allow", "GET, POST, OPTIONS")
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)

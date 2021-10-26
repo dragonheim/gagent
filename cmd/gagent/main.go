@@ -1,12 +1,15 @@
 package main
 
 import (
+	sha "crypto/sha256"
 	fmt "fmt"
 	ioutil "io/ioutil"
 	log "log"
 	http "net/http"
 	os "os"
 	sync "sync"
+
+	fqdn "github.com/Showmax/go-fqdn"
 
 	autorestart "github.com/slayer/autorestart"
 
@@ -53,11 +56,9 @@ var exitCodes = struct {
 }}
 
 var config gs.GagentConfig
+var agent gs.AgentDetails
 
 func main() {
-	autorestart.StartWatcher()
-	http.Handle("/metrics", promhttp.Handler())
-
 	filter := &logutils.LevelFilter{
 		Levels:   []logutils.LogLevel{"DEBUG", "INFO", "WARN", "ERROR"},
 		MinLevel: logutils.LogLevel("DEBUG"),
@@ -65,46 +66,153 @@ func main() {
 	}
 	log.SetOutput(filter)
 
-	var agent gs.Agent
-	// config.File = "/etc/gagent/gagent.hcl"
+	log.Printf("[DEBUG] Configuration is %v\n", config)
 
-	// config.Name, _ = os.Hostname()
-	// config.Mode = "setup"
+	switch config.Mode {
+	case "client":
+		log.Printf("[INFO] Running in client mode\n")
+
+		if len(config.Routers) == 0 {
+			log.Printf("[ERROR] No routers defined.\n")
+			os.Exit(exitCodes.m["NO_ROUTERS_DEFINED"])
+		}
+
+		var err error
+		if config.CMode {
+			agent.ScriptCode, err = ioutil.ReadFile(config.File)
+			if err != nil {
+				log.Printf("[ERROR] No such file or directory: %s", config.File)
+				os.Exit(exitCodes.m["AGENT_LOAD_FAILED"])
+			}
+			agent.Shasum = fmt.Sprintf("%x", sha.Sum256(agent.ScriptCode))
+			agent.Status = "loaded"
+			log.Printf("[DEBUG] SHA256 of Agent file: %s", agent.Shasum)
+		}
+
+		wg.Add(1)
+		go gc.Main(&wg, config, string(agent.ScriptCode))
+
+	case "router":
+		log.Printf("[INFO] Running in router mode\n")
+
+		if len(config.Workers) == 0 {
+			log.Printf("[ERROR] No workers defined.\n")
+			os.Exit(exitCodes.m["NO_WORKERS_DEFINED"])
+		}
+
+		wg.Add(1)
+		go gr.Main(&wg, config)
+
+	case "worker":
+		log.Printf("[INFO] Running in worker mode\n")
+
+		if len(config.Routers) == 0 {
+			log.Printf("[ERROR] No routers defined.\n")
+			os.Exit(exitCodes.m["NO_ROUTERS_DEFINED"])
+		}
+
+		wg.Add(1)
+		go gw.Main(&wg, config)
+
+	case "setup":
+		log.Printf("[INFO] Running in setup mode\n")
+		f := hclwrite.NewEmptyFile()
+		rootBody := f.Body()
+		rootBody.SetAttributeValue("name", cty.StringVal(config.Name))
+		rootBody.SetAttributeValue("mode", cty.StringVal(config.Mode))
+		rootBody.SetAttributeValue("uuid", cty.StringVal(config.UUID))
+		rootBody.AppendNewline()
+
+		routerBlock1 := rootBody.AppendNewBlock("router", []string{config.Name})
+		routerBody1 := routerBlock1.Body()
+		routerBody1.SetAttributeValue("routerid", cty.StringVal(config.UUID))
+		routerBody1.SetAttributeValue("address", cty.StringVal("127.0.0.1"))
+		routerBody1.SetAttributeValue("clientport", cty.NumberIntVal(config.ClientPort))
+		rootBody.AppendNewline()
+
+		log.Printf("\n%s", f.Bytes())
+		os.Exit(exitCodes.m["SUCCESS"])
+
+	default:
+		log.Printf("[ERROR] Unknown operating mode, exiting.\n")
+		os.Exit(exitCodes.m["INVALID_MODE"])
+	}
+
+	wg.Wait()
+	os.Exit(exitCodes.m["SUCCESS"])
+}
+
+func init() {
+	var err error
+
+	autorestart.StartWatcher()
+
+	http.Handle("/metrics", promhttp.Handler())
+
+	/*
+	 * Start Prometheus metrics exporter
+	 */
+	go http.ListenAndServe(fmt.Sprintf("%s:%d", config.ListenAddr, config.ClientPort), nil)
+
+	/*
+	 * Initialize the exit codes
+	 */
+	exitCodes.m["SUCCESS"] = 0
+	exitCodes.m["INVALID_MODE"] = 1
+	exitCodes.m["CONFIG_FILE_MISSING"] = 2
+	exitCodes.m["NO_ROUTERS_DEFINED"] = 3
+	exitCodes.m["NO_WORKERS_DEFINED"] = 4
+	exitCodes.m["AGENT_NOT_DEFINED"] = 5
+	exitCodes.m["AGENT_LOAD_FAILED"] = 6
+
+	/*
+	 * Initialize the configuration
+	 */
+	config.Version = semVER
+
+	config.File = "/etc/gagent/gagent.hcl"
+
+	config.Mode = "setup"
+
+	config.Name, _ = fqdn.FqdnHostname()
 
 	/*
 	 * Set a default UUID for this node.
 	 * This is used throughout the G'Agent system to uniquely identify this node.
 	 * It can be overridden in the configuration file by setting uuid
 	 */
-	// identity := uuid.NewV4UUID()
-	// config.UUID = identity.String()
+	config.UUID = uuid.NewV4UUID().String()
 
 	/*
 	 * By default, we want to listen on all IP addresses. It can be overridden
 	 * in the configuration file by setting listenaddr
 	 */
-	// config.ListenAddr = "0.0.0.0"
+	config.ListenAddr = "0.0.0.0"
 
 	/*
 	 * By default, G'Agent client will use port 35571 to communicate with the
 	 * routers, but you can override it by setting the clientport in the
 	 * configuration file
 	 */
-	// config.ClientPort = 35571
+	config.ClientPort = 35571
 
 	/*
 	 * By default, G'Agent router will use port 35572 to communicate with
 	 * other routers, but you can override it by setting the routerport in
 	 * the configuration file
 	 */
-	// config.RouterPort = 35570
+	config.RouterPort = 35570
 
 	/*
 	 * By default, G'Agent worker will use port 35570 to communicate with the
 	 * routers, but you can override it by setting the workerport in the
 	 * configuration file
 	 */
-	// config.WorkerPort = 35572
+	config.WorkerPort = 35572
+
+	config.Clients = make([]*gs.ClientDetails, 0)
+	config.Routers = make([]*gs.RouterDetails, 0)
+	config.Workers = make([]*gs.WorkerDetails, 0)
 
 	/*
 	 * Create a usage variable and then use that to declare the arguments and
@@ -148,15 +256,15 @@ func main() {
 	opts, _ := docopt.ParseArgs(usage, nil, semVER)
 	log.Printf("[DEBUG] Arguments are %v\n", opts)
 
-	log.Printf("[DEBUG] Config is %v\n", config)
 	if opts["--config"] != nil {
 		config.File = opts["--config"].(string)
 	}
 
-	/*
-	 * Start Prometheus metrics exporter
-	 */
-	go http.ListenAndServe(fmt.Sprintf("%s:%d", config.ListenAddr, config.ClientPort), nil)
+	err = hclsimple.DecodeFile(config.File, nil, &config)
+	if err != nil && opts["setup"] == false {
+		log.Printf("[ERROR] Failed to load configuration file: %s.\n", config.File)
+		os.Exit(exitCodes.m["CONFIG_FILE_MISSING"])
+	}
 
 	/*
 	 * Let the command line mode override the configuration.
@@ -164,20 +272,24 @@ func main() {
 	if opts["setup"] == true {
 		config.Mode = "setup"
 	} else {
-		err := hclsimple.DecodeFile(config.File, nil, &config)
-		if err != nil {
-			log.Printf("[ERROR] Failed to load configuration file: %s.\n%s\n", config.File, err)
-			os.Exit(exitCodes.m["CONFIG_FILE_MISSING"])
-		}
 		if opts["client"] == true {
 			config.Mode = "client"
+			if opts["--agent"] == nil {
+				log.Printf("[ERROR] Agent file not specified")
+				os.Exit(exitCodes.m["AGENT_NOT_DEFINED"])
+			} else {
+				config.File = opts["--agent"].(string)
+			}
+
 			if opts["pull"] == true {
 				config.CMode = false
 			}
+
 			if opts["push"] == true {
 				config.CMode = true
 			}
 		}
+
 		if opts["router"] == true {
 			config.Mode = "router"
 		}
@@ -185,108 +297,6 @@ func main() {
 			config.Mode = "worker"
 		}
 	}
-	config.Version = semVER
-	log.Printf("[DEBUG] Configuration is %v\n", config)
 
-	switch config.Mode {
-	case "client":
-		log.Printf("[INFO] Running in client mode\n")
-
-		if len(config.Routers) == 0 {
-			log.Printf("[ERROR] No routers defined.\n")
-			os.Exit(exitCodes.m["NO_ROUTERS_DEFINED"])
-		}
-
-		if opts["--agent"] == nil {
-			log.Printf("[ERROR] Agent file not specified")
-			os.Exit(exitCodes.m["AGENT_NOT_DEFINED"])
-		}
-
-		// var agent []byte
-		var err error
-		if config.CMode {
-			agent.ScriptCode, err = ioutil.ReadFile(opts["--agent"].(string))
-			if err != nil {
-				log.Printf("[ERROR] Failed to load Agent file: %s", opts["--agent"])
-				os.Exit(exitCodes.m["AGENT_LOAD_FAILED"])
-			}
-		}
-
-		wg.Add(1)
-		go gc.Main(&wg, config, string(agent.ScriptCode))
-
-	case "router":
-		log.Printf("[INFO] Running in router mode\n")
-
-		if len(config.Workers) == 0 {
-			log.Printf("[ERROR] No workers defined.\n")
-			os.Exit(exitCodes.m["NO_WORKERS_DEFINED"])
-		}
-
-		wg.Add(1)
-		go gr.Main(&wg, config)
-
-	case "worker":
-		log.Printf("[INFO] Running in worker mode\n")
-
-		if len(config.Routers) == 0 {
-			log.Printf("[ERROR] No routers defined.\n")
-			os.Exit(exitCodes.m["NO_ROUTERS_DEFINED"])
-		}
-
-		wg.Add(1)
-		go gw.Main(&wg, config)
-
-	case "setup":
-		log.Printf("[INFO] Running in setup mode\n")
-		f := hclwrite.NewEmptyFile()
-		rootBody := f.Body()
-		rootBody.SetAttributeValue("name", cty.StringVal(config.Name))
-		rootBody.SetAttributeValue("mode", cty.StringVal(config.Mode))
-		rootBody.SetAttributeValue("uuid", cty.StringVal(config.UUID))
-		rootBody.AppendNewline()
-
-		routerBlock1 := rootBody.AppendNewBlock("router", []string{config.Name})
-		routerBody1 := routerBlock1.Body()
-		routerBody1.SetAttributeValue("routerid", cty.StringVal(config.UUID))
-		routerBody1.SetAttributeValue("address", cty.StringVal("127.0.0.1"))
-		rootBody.AppendNewline()
-
-		log.Printf("\n%s", f.Bytes())
-		os.Exit(exitCodes.m["SUCCESS"])
-
-	default:
-		log.Printf("[ERROR] Unknown operating mode, exiting.\n")
-		os.Exit(exitCodes.m["INVALID_MODE"])
-	}
-
-	wg.Wait()
-	os.Exit(exitCodes.m["SUCCESS"])
-}
-
-func init() {
-	// Initialize the configuration
-	config.Mode = "setup"
-	config.Name, _ = os.Hostname()
-	config.UUID = uuid.NewV4UUID().String()
-	config.ListenAddr = "0.0.0.0"
-	config.ClientPort = 35571
-	config.RouterPort = 35570
-	config.WorkerPort = 35572
-	config.Clients = make([]*gs.ClientDetails, 0)
-	config.Routers = make([]*gs.RouterDetails, 0)
-	config.Workers = make([]*gs.WorkerDetails, 0)
-	config.File = "/etc/gagent/gagent.hcl"
-	config.Version = semVER
-
-	// Initialize the exit codes
-	// exitCodes.m = make(map[string]int)
-	exitCodes.m["SUCCESS"] = 0
-	exitCodes.m["INVALID_MODE"] = 1
-	exitCodes.m["CONFIG_FILE_MISSING"] = 2
-	exitCodes.m["NO_ROUTERS_DEFINED"] = 3
-	exitCodes.m["NO_WORKERS_DEFINED"] = 4
-	exitCodes.m["AGENT_NOT_DEFINED"] = 5
-	exitCodes.m["AGENT_LOAD_FAILED"] = 6
-
+	log.Printf("[DEBUG] Config is %v\n", config)
 }

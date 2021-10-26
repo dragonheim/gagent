@@ -23,7 +23,9 @@ func Main(wg *sync.WaitGroup, config gs.GagentConfig, agent string) {
 	log.Printf("[INFO] Starting client\n")
 
 	for key := range config.Routers {
-		// Generate connect string for this router.
+		/*
+		 * Generate connect string for this router.
+		 */
 		rport := config.ClientPort
 		if config.Routers[key].ClientPort != 0 {
 			rport = config.Routers[key].ClientPort

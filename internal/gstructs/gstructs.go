@@ -17,13 +17,9 @@ type GagentConfig struct {
 	CMode      bool
 }
 
-type Agent struct {
-	Client     string
-	ScriptCode []byte
-	Hints      []*string
-}
-
-// ClientDetails is details about known clients
+/*
+ * ClientDetails are details about known clients
+ */
 type ClientDetails struct {
 	/*
 	 * Client name for display purposes in logs and
@@ -40,7 +36,9 @@ type ClientDetails struct {
 	ClientID string `hcl:"clientid,optional"`
 }
 
-// RouterDetails is details about known routers
+/*
+ * RouterDetails is details about known routers
+ */
 type RouterDetails struct {
 	/*
 	 * Router name for display purposes in logs and
@@ -93,7 +91,9 @@ type RouterDetails struct {
 	RouterTags []string `hcl:"tags,optional"`
 }
 
-// WorkerDetails is details about known workers
+/*
+ * WorkerDetails is details about known workers
+ */
 type WorkerDetails struct {
 	/*
 	 * Router name for display purposes in logs and
@@ -116,4 +116,16 @@ type WorkerDetails struct {
 	 * to send the agent and it's results to.
 	 */
 	WorkerTags []string `hcl:"tags,optional"`
+}
+
+type BlockChainDB struct {
+	DBName string          `hcl:"chain_id,optional"`
+	Agents []*AgentDetails `hcl:"agent,block"`
+}
+type AgentDetails struct {
+	ScriptCode []byte
+	Hints      []*string
+	Client     string `hcl:"client"`
+	Shasum     string `hcl:"shasum"`
+	Status     string `hcl:"status"`
 }
