@@ -119,13 +119,13 @@ type WorkerDetails struct {
 }
 
 type BlockChainDB struct {
-	DBName string          `hcl:"chain_id,optional"`
+	DBName string          `hcl:"chainid,optional"`
 	Agents []*AgentDetails `hcl:"agent,block"`
 }
 type AgentDetails struct {
-	ScriptCode []byte
-	Hints      []*string
 	Client     string `hcl:"client"`
 	Shasum     string `hcl:"shasum"`
 	Status     string `hcl:"status"`
+	ScriptCode []byte
+	Hints      []*string
 }

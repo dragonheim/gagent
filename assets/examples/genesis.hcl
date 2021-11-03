@@ -1,5 +1,5 @@
 "genesis_time" = "2021-10-25:00:00.000000000Z"
-"chain_id" = "gagent_ledger"
+"chainid" = "gagent_ledger"
 
 "agent" = {
   "client" = "7e9d13fe-5151-5876-66c0-20ca03e8fca4"
