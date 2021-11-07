@@ -6,7 +6,7 @@ import (
 	http "net/http"
 	sync "sync"
 
-	gs "git.dragonheim.net/dragonheim/gagent/internal/gstructs"
+	gstructs "git.dragonheim.net/dragonheim/gagent/internal/gstructs"
 
 	prometheus "github.com/prometheus/client_golang/prometheus"
 	promauto "github.com/prometheus/client_golang/prometheus/promauto"
@@ -27,12 +27,11 @@ var (
  or client node. Tags are used by the agent to give hints as to where
  it should be routed.
 */
-func Main(wg *sync.WaitGroup, config gs.GagentConfig) {
-	defer wg.Done()
-	http.HandleFunc("/hello", answerClient)
-
+func Main(wg *sync.WaitGroup, config gstructs.GagentConfig) {
 	log.Printf("[INFO] Starting router\n")
+	defer wg.Done()
 
+	http.HandleFunc("/hello", answerClient)
 	clientSock, _ := zmq.NewSocket(zmq.ROUTER)
 	defer clientSock.Close()
 

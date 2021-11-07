@@ -1,9 +1,7 @@
 package main
 
 import (
-	sha "crypto/sha256"
 	fmt "fmt"
-	ioutil "io/ioutil"
 	log "log"
 	http "net/http"
 	os "os"
@@ -13,7 +11,7 @@ import (
 
 	autorestart "github.com/slayer/autorestart"
 
-	gstruct "git.dragonheim.net/dragonheim/gagent/internal/gstructs"
+	gstructs "git.dragonheim.net/dragonheim/gagent/internal/gstructs"
 
 	gc "git.dragonheim.net/dragonheim/gagent/internal/client"
 	gr "git.dragonheim.net/dragonheim/gagent/internal/router"
@@ -43,8 +41,8 @@ var exitCodes = struct {
 	m map[string]int
 }{m: map[string]int{}}
 
-var config gstruct.GagentConfig
-var agent gstruct.AgentDetails
+var config gstructs.GagentConfig
+var agent gstructs.AgentDetails
 
 func main() {
 	filter := &logutils.LevelFilter{
@@ -65,20 +63,8 @@ func main() {
 			os.Exit(exitCodes.m["NO_ROUTERS_DEFINED"])
 		}
 
-		var err error
-		if config.CMode {
-			agent.ScriptCode, err = ioutil.ReadFile(config.File)
-			if err != nil {
-				log.Printf("[ERROR] No such file or directory: %s", config.File)
-				os.Exit(exitCodes.m["AGENT_LOAD_FAILED"])
-			}
-			agent.Shasum = fmt.Sprintf("%x", sha.Sum256(agent.ScriptCode))
-			agent.Status = "loaded"
-			log.Printf("[DEBUG] SHA256 of Agent file: %s", agent.Shasum)
-		}
-
 		wg.Add(1)
-		go gc.Main(&wg, config, string(agent.ScriptCode))
+		go gc.Main(&wg, config)
 
 	case "router":
 		log.Printf("[INFO] Running in router mode\n")
@@ -103,6 +89,8 @@ func main() {
 		go gw.Main(&wg, config)
 
 	case "setup":
+		log.Printf("[INFO] Running in setup mode\n")
+
 		wg.Add(1)
 		go gs.Main(&wg, config)
 
@@ -185,9 +173,9 @@ func init() {
 	 */
 	config.WorkerPort = 35572
 
-	config.Clients = make([]*gstruct.ClientDetails, 0)
-	config.Routers = make([]*gstruct.RouterDetails, 0)
-	config.Workers = make([]*gstruct.WorkerDetails, 0)
+	config.Clients = make([]*gstructs.ClientDetails, 0)
+	config.Routers = make([]*gstructs.RouterDetails, 0)
+	config.Workers = make([]*gstructs.WorkerDetails, 0)
 
 	/*
 	 * Create a usage variable and then use that to declare the arguments and

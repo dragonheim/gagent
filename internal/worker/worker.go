@@ -5,7 +5,7 @@ import (
 	log "log"
 	sync "sync"
 
-	gs "git.dragonheim.net/dragonheim/gagent/internal/gstructs"
+	gstructs "git.dragonheim.net/dragonheim/gagent/internal/gstructs"
 
 	// picol "git.dragonheim.net/dragonheim/gagent/src/picol"
 
@@ -27,9 +27,9 @@ var (
  router(s) they are connected. The worker will execute the agent code and
  pass the agent and it's results to a router.
 */
-func Main(wg *sync.WaitGroup, config gs.GagentConfig) {
-	defer wg.Done()
+func Main(wg *sync.WaitGroup, config gstructs.GagentConfig) {
 	log.Printf("[INFO] Starting worker\n")
+	defer wg.Done()
 
 	for key := range config.Routers {
 		rport := config.WorkerPort

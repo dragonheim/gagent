@@ -12,7 +12,7 @@ import (
 )
 
 func Main(wg *sync.WaitGroup, config gs.GagentConfig) {
-	log.Printf("[INFO] Running in setup mode\n")
+	log.Printf("[INFO] setup mode\n")
 	defer wg.Done()
 
 	f := hclwrite.NewEmptyFile()

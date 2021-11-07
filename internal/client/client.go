@@ -1,12 +1,15 @@
 package client
 
 import (
+	sha "crypto/sha256"
 	fmt "fmt"
+	ioutil "io/ioutil"
 	log "log"
+	os "os"
 	sync "sync"
 	time "time"
 
-	gs "git.dragonheim.net/dragonheim/gagent/internal/gstructs"
+	gstructs "git.dragonheim.net/dragonheim/gagent/internal/gstructs"
 
 	zmq "github.com/pebbe/zmq4"
 )
@@ -18,9 +21,23 @@ import (
  will contact the router and attempt to retrieve the results
  of it's most recent request.
 */
-func Main(wg *sync.WaitGroup, config gs.GagentConfig, agent string) {
-	defer wg.Done()
+func Main(wg *sync.WaitGroup, config gstructs.GagentConfig) {
 	log.Printf("[INFO] Starting client\n")
+	defer wg.Done()
+
+	var agent gstructs.AgentDetails
+	var err error
+
+	if config.CMode {
+		agent.ScriptCode, err = ioutil.ReadFile(config.File)
+		if err != nil {
+			log.Printf("[ERROR] No such file or directory: %s", config.File)
+			os.Exit(6)
+		}
+		agent.Shasum = fmt.Sprintf("%x", sha.Sum256(agent.ScriptCode))
+		agent.Status = "loaded"
+		log.Printf("[DEBUG] SHA256 of Agent file: %s", agent.Shasum)
+	}
 
 	for key := range config.Routers {
 		/*
@@ -33,14 +50,15 @@ func Main(wg *sync.WaitGroup, config gs.GagentConfig, agent string) {
 		connectString := fmt.Sprintf("tcp://%s:%d", config.Routers[key].RouterAddr, rport)
 
 		wg.Add(1)
-		go sendAgent(wg, config.UUID, connectString, agent)
+		go sendAgent(wg, config.UUID, connectString, agent.ScriptCode)
 		time.Sleep(10 * time.Millisecond)
 	}
 }
 
-func sendAgent(wg *sync.WaitGroup, uuid string, connectString string, agent string) {
+func sendAgent(wg *sync.WaitGroup, uuid string, connectString string, agent []byte) {
 	log.Printf("[DEBUG] Attempting to connect to %s\n", connectString)
 	defer wg.Done()
+
 	var mu sync.Mutex
 	mu.Lock()
 
