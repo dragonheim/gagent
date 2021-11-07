@@ -13,18 +13,16 @@ import (
 
 	autorestart "github.com/slayer/autorestart"
 
-	gs "git.dragonheim.net/dragonheim/gagent/internal/gstructs"
+	gstruct "git.dragonheim.net/dragonheim/gagent/internal/gstructs"
 
 	gc "git.dragonheim.net/dragonheim/gagent/internal/client"
 	gr "git.dragonheim.net/dragonheim/gagent/internal/router"
+	gs "git.dragonheim.net/dragonheim/gagent/internal/setup"
 	gw "git.dragonheim.net/dragonheim/gagent/internal/worker"
-
-	cty "github.com/zclconf/go-cty/cty"
 
 	docopt "github.com/aviddiviner/docopt-go"
 
 	hclsimple "github.com/hashicorp/hcl/v2/hclsimple"
-	hclwrite "github.com/hashicorp/hcl/v2/hclwrite"
 
 	logutils "github.com/hashicorp/logutils"
 
@@ -45,8 +43,8 @@ var exitCodes = struct {
 	m map[string]int
 }{m: map[string]int{}}
 
-var config gs.GagentConfig
-var agent gs.AgentDetails
+var config gstruct.GagentConfig
+var agent gstruct.AgentDetails
 
 func main() {
 	filter := &logutils.LevelFilter{
@@ -105,39 +103,8 @@ func main() {
 		go gw.Main(&wg, config)
 
 	case "setup":
-		log.Printf("[INFO] Running in setup mode\n")
-		f := hclwrite.NewEmptyFile()
-		rootBody := f.Body()
-		rootBody.SetAttributeValue("name", cty.StringVal(config.Name))
-		rootBody.SetAttributeValue("mode", cty.StringVal(config.Mode))
-		rootBody.SetAttributeValue("uuid", cty.StringVal(config.UUID))
-		rootBody.SetAttributeValue("listenaddr", cty.StringVal("0.0.0.0"))
-		rootBody.SetAttributeValue("clientport", cty.NumberIntVal(config.ClientPort))
-		rootBody.SetAttributeValue("routerport", cty.NumberIntVal(config.RouterPort))
-		rootBody.SetAttributeValue("workerport", cty.NumberIntVal(config.WorkerPort))
-		rootBody.AppendNewline()
-
-		clientBlock1 := rootBody.AppendNewBlock("client", []string{config.Name})
-		clientBody1 := clientBlock1.Body()
-		clientBody1.SetAttributeValue("clientid", cty.StringVal(config.UUID))
-		rootBody.AppendNewline()
-
-		routerBlock1 := rootBody.AppendNewBlock("router", []string{config.Name})
-		routerBody1 := routerBlock1.Body()
-		routerBody1.SetAttributeValue("routerid", cty.StringVal(config.UUID))
-		routerBody1.SetAttributeValue("address", cty.StringVal("127.0.0.1"))
-		routerBody1.SetAttributeValue("clientport", cty.NumberIntVal(config.ClientPort))
-		routerBody1.SetAttributeValue("routerport", cty.NumberIntVal(config.RouterPort))
-		routerBody1.SetAttributeValue("workerport", cty.NumberIntVal(config.WorkerPort))
-		rootBody.AppendNewline()
-
-		workerBlock1 := rootBody.AppendNewBlock("worker", []string{config.Name})
-		workerBody1 := workerBlock1.Body()
-		workerBody1.SetAttributeValue("workerid", cty.StringVal(config.UUID))
-		rootBody.AppendNewline()
-
-		log.Printf("\n%s", f.Bytes())
-		os.Exit(exitCodes.m["SUCCESS"])
+		wg.Add(1)
+		go gs.Main(&wg, config)
 
 	default:
 		log.Printf("[ERROR] Unknown operating mode, exiting.\n")
@@ -218,9 +185,9 @@ func init() {
 	 */
 	config.WorkerPort = 35572
 
-	config.Clients = make([]*gs.ClientDetails, 0)
-	config.Routers = make([]*gs.RouterDetails, 0)
-	config.Workers = make([]*gs.WorkerDetails, 0)
+	config.Clients = make([]*gstruct.ClientDetails, 0)
+	config.Routers = make([]*gstruct.RouterDetails, 0)
+	config.Workers = make([]*gstruct.WorkerDetails, 0)
 
 	/*
 	 * Create a usage variable and then use that to declare the arguments and
