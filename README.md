@@ -18,7 +18,7 @@ Imagine, for a moment, that you are on Mars and need to perform a data search in
 1  : ###################
 2  : ### Hello Earth ###
 3  : ###################
-4  : array set GHINT ["thermal measurements" "gravity measurements" "gravity fluctuations"]
+4  : set GHINT [split "thermal measurements, gravity measurements, gravity fluctuations" ,]
 5  : proc hello_earth {} {
 6  :   puts "Hello Earth, does localized tempurature variations alter specific gravity?"
 7  : }

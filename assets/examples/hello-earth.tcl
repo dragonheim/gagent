@@ -1,7 +1,7 @@
 ###################
 ### Hello Earth ###
 ###################
-array set GHINT ["thermal measurements" "gravity measurements" "gravity fluctuations"]
+set GHINT [split "thermal measurements, gravity measurements, gravity fluctuations" ,]
 proc hello_earth {} {
   puts "Hello Earth, does localized tempurature variations alter specific gravity?"
 }

@@ -30,28 +30,31 @@ import (
 )
 
 var (
-	semVER = "0.0.2"
+	semVER = "0.0.3"
 )
 
 var (
 	wg sync.WaitGroup
 )
 
-var exitCodes = struct {
-	m map[string]int
-}{m: map[string]int{}}
+/*
+ * Exit Codes
+ *  0 Success
+ *  1 Configuration file is missing or unreadable
+ *  2 Setup failed
+ *  3 Invalid mode of operation
+ *  4 Agent file is missing or unreadable
+ *  5 Agent is missing tags
+ *  6 No routers defined
+ *  7 No workers defined
+ *  8 Agent not defined
+ *  9 Agent hints / tags not defined
+ * 10 Router not connected
+ */
 
 var config gstructs.GagentConfig
-var agent gstructs.AgentDetails
 
 func main() {
-	filter := &logutils.LevelFilter{
-		Levels:   []logutils.LogLevel{"DEBUG", "INFO", "WARN", "ERROR"},
-		MinLevel: logutils.LogLevel("DEBUG"),
-		Writer:   os.Stderr,
-	}
-	log.SetOutput(filter)
-
 	log.Printf("[DEBUG] Configuration is %v\n", config)
 
 	switch config.Mode {
@@ -60,7 +63,7 @@ func main() {
 
 		if len(config.Routers) == 0 {
 			log.Printf("[ERROR] No routers defined.\n")
-			os.Exit(exitCodes.m["NO_ROUTERS_DEFINED"])
+			os.Exit(6)
 		}
 
 		wg.Add(1)
@@ -71,7 +74,7 @@ func main() {
 
 		if len(config.Workers) == 0 {
 			log.Printf("[ERROR] No workers defined.\n")
-			os.Exit(exitCodes.m["NO_WORKERS_DEFINED"])
+			os.Exit(7)
 		}
 
 		wg.Add(1)
@@ -82,7 +85,7 @@ func main() {
 
 		if len(config.Routers) == 0 {
 			log.Printf("[ERROR] No routers defined.\n")
-			os.Exit(exitCodes.m["NO_ROUTERS_DEFINED"])
+			os.Exit(6)
 		}
 
 		wg.Add(1)
@@ -96,37 +99,26 @@ func main() {
 
 	default:
 		log.Printf("[ERROR] Unknown operating mode, exiting.\n")
-		os.Exit(exitCodes.m["INVALID_MODE"])
+		os.Exit(3)
 	}
 
 	wg.Wait()
-	os.Exit(exitCodes.m["SUCCESS"])
+	os.Exit(0)
 }
 
 func init() {
-	var err error
+	// var err error
 
 	autorestart.StartWatcher()
 
+	filter := &logutils.LevelFilter{
+		Levels:   []logutils.LogLevel{"DEBUG", "INFO", "WARN", "ERROR"},
+		MinLevel: logutils.LogLevel("DEBUG"),
+		Writer:   os.Stderr,
+	}
+	log.SetOutput(filter)
+
 	http.Handle("/metrics", promhttp.Handler())
-
-	/*
-	 * Start Prometheus metrics exporter
-	 */
-	go http.ListenAndServe(fmt.Sprintf("%s:%d", config.ListenAddr, config.ClientPort), nil)
-
-	/*
-	 * Initialize the exit codes
-	 */
-	exitCodes.m["SUCCESS"] = 0
-	exitCodes.m["INVALID_MODE"] = 1
-	exitCodes.m["CONFIG_FILE_MISSING"] = 2
-	exitCodes.m["NO_ROUTERS_DEFINED"] = 3
-	exitCodes.m["NO_WORKERS_DEFINED"] = 4
-	exitCodes.m["AGENT_NOT_DEFINED"] = 5
-	exitCodes.m["AGENT_LOAD_FAILED"] = 6
-	exitCodes.m["AGENT_MISSING_TAGS"] = 7
-	exitCodes.m["AGENT_NOT_DEFINED"] = 8
 
 	/*
 	 * Initialize the configuration
@@ -151,6 +143,12 @@ func init() {
 	 * in the configuration file by setting listenaddr
 	 */
 	config.ListenAddr = "0.0.0.0"
+
+	/*
+	 * By default, G'Agent will use port 9101 or monitoring via prometheus.
+	 * It can be overridden in the configuration file by setting clientport
+	 */
+	config.MonitorPort = 9101
 
 	/*
 	 * By default, G'Agent client will use port 35571 to communicate with the
@@ -223,10 +221,10 @@ func init() {
 		config.File = opts["--config"].(string)
 	}
 
-	err = hclsimple.DecodeFile(config.File, nil, &config)
+	err := hclsimple.DecodeFile(config.File, nil, &config)
 	if err != nil && opts["setup"] == false {
 		log.Printf("[ERROR] Failed to load configuration file: %s.\n", config.File)
-		os.Exit(exitCodes.m["CONFIG_FILE_MISSING"])
+		os.Exit(1)
 	}
 
 	/*
@@ -239,7 +237,7 @@ func init() {
 			config.Mode = "client"
 			if opts["--agent"] == nil {
 				log.Printf("[ERROR] Agent file not specified")
-				os.Exit(exitCodes.m["AGENT_NOT_DEFINED"])
+				os.Exit(8)
 			} else {
 				config.File = opts["--agent"].(string)
 			}
@@ -263,4 +261,10 @@ func init() {
 	}
 
 	log.Printf("[DEBUG] Config is %v\n", config)
+
+	/*
+	 * Start Prometheus metrics exporter
+	 */
+	go http.ListenAndServe(fmt.Sprintf("%s:%d", config.ListenAddr, config.MonitorPort), nil)
+
 }

@@ -2,19 +2,20 @@ package gstructs
 
 // GagentConfig is the primary construct used by all modes
 type GagentConfig struct {
-	Name       string           `hcl:"name,optional"`
-	Mode       string           `hcl:"mode,attr"`
-	UUID       string           `hcl:"uuid,optional"`
-	ListenAddr string           `hcl:"listenaddr,optional"`
-	ClientPort int64            `hcl:"clientport,optional"`
-	RouterPort int64            `hcl:"routerport,optional"`
-	WorkerPort int64            `hcl:"workerport,optional"`
-	Clients    []*ClientDetails `hcl:"client,block"`
-	Routers    []*RouterDetails `hcl:"router,block"`
-	Workers    []*WorkerDetails `hcl:"worker,block"`
-	Version    string
-	File       string
-	CMode      bool
+	Name        string           `hcl:"name,optional"`
+	Mode        string           `hcl:"mode,attr"`
+	UUID        string           `hcl:"uuid,optional"`
+	MonitorPort int              `hcl:"monitorport,optional"`
+	ListenAddr  string           `hcl:"listenaddr,optional"`
+	ClientPort  int64            `hcl:"clientport,optional"`
+	RouterPort  int64            `hcl:"routerport,optional"`
+	WorkerPort  int64            `hcl:"workerport,optional"`
+	Clients     []*ClientDetails `hcl:"client,block"`
+	Routers     []*RouterDetails `hcl:"router,block"`
+	Workers     []*WorkerDetails `hcl:"worker,block"`
+	Version     string
+	File        string
+	CMode       bool
 }
 
 /*
@@ -127,5 +128,5 @@ type AgentDetails struct {
 	Shasum     string `hcl:"shasum"`
 	Status     string `hcl:"status"`
 	ScriptCode []byte
-	Hints      []*string
+	Hints      []string
 }

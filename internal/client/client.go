@@ -6,6 +6,8 @@ import (
 	ioutil "io/ioutil"
 	log "log"
 	os "os"
+	regexp "regexp"
+	strings "strings"
 	sync "sync"
 	time "time"
 
@@ -32,12 +34,14 @@ func Main(wg *sync.WaitGroup, config gstructs.GagentConfig) {
 		agent.ScriptCode, err = ioutil.ReadFile(config.File)
 		if err != nil {
 			log.Printf("[ERROR] No such file or directory: %s", config.File)
-			os.Exit(6)
+			os.Exit(4)
 		}
 		agent.Shasum = fmt.Sprintf("%x", sha.Sum256(agent.ScriptCode))
 		agent.Status = "loaded"
-		log.Printf("[DEBUG] SHA256 of Agent file: %s", agent.Shasum)
+		log.Printf("[INFO] SHA256 of Agent file: %s", agent.Shasum)
+		log.Printf("[DEBUG] Agent file contents: \n%s\n", agent.ScriptCode)
 	}
+	agent.Hints = getTagsFromHints(agent)
 
 	for key := range config.Routers {
 		/*
@@ -51,12 +55,27 @@ func Main(wg *sync.WaitGroup, config gstructs.GagentConfig) {
 
 		wg.Add(1)
 		go sendAgent(wg, config.UUID, connectString, agent.ScriptCode)
-		time.Sleep(10 * time.Millisecond)
 	}
 }
 
+/*
+ * Parse Agent file for GHINT data to populate the G'Agent hints
+ */
+func getTagsFromHints(agent gstructs.AgentDetails) []string {
+	var tags []string
+	re := regexp.MustCompile(`\s*set\s+GHINT\s*\[\s*split\s*"(?P<Hints>.+)"\s*\,\s*\]`)
+	res := re.FindStringSubmatch(string(agent.ScriptCode))
+	if len(res) < 1 {
+		log.Printf("[ERROR] Agent is missing GHINT tags")
+		os.Exit(4)
+	}
+	tags = strings.Split(res[1], ",")
+	log.Printf("[DEBUG] G'Agent hints: %v\n", tags)
+
+	return tags
+}
+
 func sendAgent(wg *sync.WaitGroup, uuid string, connectString string, agent []byte) {
-	log.Printf("[DEBUG] Attempting to connect to %s\n", connectString)
 	defer wg.Done()
 
 	var mu sync.Mutex
@@ -66,10 +85,23 @@ func sendAgent(wg *sync.WaitGroup, uuid string, connectString string, agent []by
 	defer sock.Close()
 
 	sock.SetIdentity(uuid)
-	sock.Connect(connectString)
+
+	log.Printf("[DEBUG] Attempting to connect to %s\n", connectString)
+	err := sock.Connect(connectString)
+	if err != nil {
+		log.Printf("[ERROR] Failed to connect to %s\n", connectString)
+		os.Exit(10)
+	}
 
 	log.Printf("[DEBUG] Start sending agent...\n")
-	sock.SendMessage(agent)
-	log.Printf("[DEBUG] End sending agent...\n")
+	status, err := sock.SendMessage(agent)
+	if err != nil {
+		log.Printf("[ERROR] Failed to send agent to router\n")
+		// os.Exit(11)
+		return
+	}
+	log.Printf("[DEBUG] Agent send status: %d\n", status)
 	mu.Unlock()
+	time.Sleep(10 * time.Second)
+
 }
