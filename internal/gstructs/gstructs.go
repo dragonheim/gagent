@@ -129,4 +129,5 @@ type AgentDetails struct {
 	Status     string `hcl:"status"`
 	ScriptCode []byte
 	Hints      []string
+	Answer     []byte
 }

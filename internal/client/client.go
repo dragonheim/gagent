@@ -36,12 +36,14 @@ func Main(wg *sync.WaitGroup, config gstructs.GagentConfig) {
 			log.Printf("[ERROR] No such file or directory: %s", config.File)
 			os.Exit(4)
 		}
-		agent.Shasum = fmt.Sprintf("%x", sha.Sum256(agent.ScriptCode))
-		agent.Status = "loaded"
-		log.Printf("[INFO] SHA256 of Agent file: %s", agent.Shasum)
-		log.Printf("[DEBUG] Agent file contents: \n%s\n", agent.ScriptCode)
+		log.Printf("[DEBUG] Agent file contents: \n----- -----\n%s\n----- -----\n", agent.ScriptCode)
 	}
+	agent.Client = config.UUID
+	agent.Shasum = fmt.Sprintf("%x", sha.Sum256(agent.ScriptCode))
+	log.Printf("[INFO] SHA256 of Agent file: %s", agent.Shasum)
+	agent.Status = "loaded"
 	agent.Hints = getTagsFromHints(agent)
+	agent.Answer = nil
 
 	for key := range config.Routers {
 		/*
@@ -54,7 +56,7 @@ func Main(wg *sync.WaitGroup, config gstructs.GagentConfig) {
 		connectString := fmt.Sprintf("tcp://%s:%d", config.Routers[key].RouterAddr, rport)
 
 		wg.Add(1)
-		go sendAgent(wg, config.UUID, connectString, agent.ScriptCode)
+		go sendAgent(wg, config.UUID, connectString, agent)
 	}
 }
 
@@ -75,7 +77,7 @@ func getTagsFromHints(agent gstructs.AgentDetails) []string {
 	return tags
 }
 
-func sendAgent(wg *sync.WaitGroup, uuid string, connectString string, agent []byte) {
+func sendAgent(wg *sync.WaitGroup, uuid string, connectString string, agent gstructs.AgentDetails) {
 	defer wg.Done()
 
 	var mu sync.Mutex
