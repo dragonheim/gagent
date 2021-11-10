@@ -56,7 +56,7 @@ func getAgent(wg *sync.WaitGroup, uuid string, connectString string) {
 	subscriber, _ := zmq.NewSocket(zmq.REP)
 	defer subscriber.Close()
 
-	subscriber.Connect(connectString)
+	_ = subscriber.Connect(connectString)
 
 	msg, err := subscriber.Recv(0)
 	if err != nil {

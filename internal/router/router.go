@@ -39,7 +39,7 @@ func Main(wg *sync.WaitGroup, config gstructs.GagentConfig) {
 	defer workerSock.Close()
 
 	workerListener := fmt.Sprintf("tcp://%s:%d", config.ListenAddr, config.WorkerPort)
-	workerSock.Bind(workerListener)
+	_ = workerSock.Bind(workerListener)
 
 	workers := make([]string, 0)
 
@@ -48,6 +48,9 @@ func Main(wg *sync.WaitGroup, config gstructs.GagentConfig) {
 
 	poller2 := zmq.NewPoller()
 	poller2.Add(workerSock, zmq.POLLIN)
+
+	wg.Add(1)
+	go createClientListener(wg, config)
 
 LOOP:
 	for {
@@ -87,18 +90,34 @@ LOOP:
 				workers = append(workers, identity)
 
 			case clientSock:
-				/*
-				 *  Get client request, route to first available worker
-				 */
-				msg, err := s.RecvMessage(0)
-				log.Printf("[DEBUG] Client message received: %s", msg)
-				if err == nil {
-					workerSock.SendMessage(workers[0], "", msg)
-					workers = workers[1:]
-				}
+				wg.Add(1)
+				go createClientListener(wg, config)
 			}
 		}
 	}
+}
+
+/*
+ * Create listener for client requests
+ */
+func createClientListener(wg *sync.WaitGroup, config gstructs.GagentConfig) {
+	defer wg.Done()
+
+	clientSock, _ := zmq.NewSocket(zmq.ROUTER)
+	defer clientSock.Close()
+
+	clientListener := fmt.Sprintf("tcp://%s:%d", config.ListenAddr, config.ClientPort)
+	log.Printf("[DEBUG] Binding to: %s", clientListener)
+	_ = clientSock.Bind(clientListener)
+
+	for {
+		msg, err := clientSock.RecvMessage(0)
+		if err != nil {
+			break
+		}
+		log.Printf("[DEBUG] Client message received: %s", msg)
+	}
+
 }
 
 func unwrap(msg []string) (head string, tail []string) {

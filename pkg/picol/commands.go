@@ -211,16 +211,16 @@ func CommandPuts(i *Interp, argv []string, pd interface{}) (string, error) {
 func (i *Interp) RegisterCoreCommands() {
 	name := [...]string{"+", "-", "*", "/", ">", ">=", "<", "<=", "==", "!="}
 	for _, n := range name {
-		i.RegisterCommand(n, CommandMath, nil)
+		_ = i.RegisterCommand(n, CommandMath, nil)
 	}
-	i.RegisterCommand("set", CommandSet, nil)
-	i.RegisterCommand("unset", CommandUnset, nil)
-	i.RegisterCommand("if", CommandIf, nil)
-	i.RegisterCommand("while", CommandWhile, nil)
-	i.RegisterCommand("break", CommandRetCodes, nil)
-	i.RegisterCommand("continue", CommandRetCodes, nil)
-	i.RegisterCommand("proc", CommandProc, nil)
-	i.RegisterCommand("return", CommandReturn, nil)
-	i.RegisterCommand("error", CommandError, nil)
-	i.RegisterCommand("puts", CommandPuts, nil)
+	_ = i.RegisterCommand("set", CommandSet, nil)
+	_ = i.RegisterCommand("unset", CommandUnset, nil)
+	_ = i.RegisterCommand("if", CommandIf, nil)
+	_ = i.RegisterCommand("while", CommandWhile, nil)
+	_ = i.RegisterCommand("break", CommandRetCodes, nil)
+	_ = i.RegisterCommand("continue", CommandRetCodes, nil)
+	_ = i.RegisterCommand("proc", CommandProc, nil)
+	_ = i.RegisterCommand("return", CommandReturn, nil)
+	_ = i.RegisterCommand("error", CommandError, nil)
+	_ = i.RegisterCommand("puts", CommandPuts, nil)
 }

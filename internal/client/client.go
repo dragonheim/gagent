@@ -86,10 +86,10 @@ func sendAgent(wg *sync.WaitGroup, uuid string, connectString string, agent gstr
 	sock, _ := zmq.NewSocket(zmq.REQ)
 	defer sock.Close()
 
-	sock.SetIdentity(uuid)
+	err := sock.SetIdentity(uuid)
 
 	log.Printf("[DEBUG] Attempting to connect to %s\n", connectString)
-	err := sock.Connect(connectString)
+	err = sock.Connect(connectString)
 	if err != nil {
 		log.Printf("[ERROR] Failed to connect to %s\n", connectString)
 		os.Exit(10)
