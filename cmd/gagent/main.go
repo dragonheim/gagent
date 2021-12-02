@@ -30,7 +30,7 @@ import (
 )
 
 var (
-	semVER = "0.0.3"
+	semVER = "0.0.4"
 )
 
 var (

@@ -10,6 +10,7 @@ type GagentConfig struct {
 	ClientPort  int64            `hcl:"clientport,optional"`
 	RouterPort  int64            `hcl:"routerport,optional"`
 	WorkerPort  int64            `hcl:"workerport,optional"`
+	ChainDBPath string           `hcl:"chaindbpath,optional"`
 	Clients     []*ClientDetails `hcl:"client,block"`
 	Routers     []*RouterDetails `hcl:"router,block"`
 	Workers     []*WorkerDetails `hcl:"worker,block"`
@@ -119,10 +120,6 @@ type WorkerDetails struct {
 	WorkerTags []string `hcl:"tags,optional"`
 }
 
-type BlockChainDB struct {
-	DBName string          `hcl:"chainid,optional"`
-	Agents []*AgentDetails `hcl:"agent,block"`
-}
 type AgentDetails struct {
 	Client     string `hcl:"client"`
 	Shasum     string `hcl:"shasum"`

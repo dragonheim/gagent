@@ -39,7 +39,7 @@ func Main(wg *sync.WaitGroup, config gstructs.GagentConfig) {
 		log.Printf("[DEBUG] Agent file contents: \n----- -----\n%s\n----- -----\n", agent.ScriptCode)
 	}
 	agent.Client = config.UUID
-	agent.Shasum = fmt.Sprintf("%x", sha.Sum256(agent.ScriptCode))
+	agent.Shasum = fmt.Sprintf("%s", sha.Sum256(agent.ScriptCode))
 	log.Printf("[INFO] SHA256 of Agent file: %s", agent.Shasum)
 	agent.Status = "loaded"
 	agent.Hints = getTagsFromHints(agent)
@@ -86,10 +86,10 @@ func sendAgent(wg *sync.WaitGroup, uuid string, connectString string, agent gstr
 	sock, _ := zmq.NewSocket(zmq.REQ)
 	defer sock.Close()
 
-	err := sock.SetIdentity(uuid)
+	_ = sock.SetIdentity(uuid)
 
 	log.Printf("[DEBUG] Attempting to connect to %s\n", connectString)
-	err = sock.Connect(connectString)
+	err := sock.Connect(connectString)
 	if err != nil {
 		log.Printf("[ERROR] Failed to connect to %s\n", connectString)
 		os.Exit(10)

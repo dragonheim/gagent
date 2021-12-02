@@ -6,6 +6,7 @@ import (
 	http "net/http"
 	sync "sync"
 
+	gcdb "git.dragonheim.net/dragonheim/gagent/internal/chaindb"
 	gstructs "git.dragonheim.net/dragonheim/gagent/internal/gstructs"
 
 	prometheus "github.com/prometheus/client_golang/prometheus"
@@ -18,6 +19,8 @@ var (
 	opsProcessed = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "client_requests_recieved",
 	})
+
+	db gcdb.GagentDb
 )
 
 /*
@@ -37,6 +40,8 @@ func Main(wg *sync.WaitGroup, config gstructs.GagentConfig) {
 
 	workerSock, _ := zmq.NewSocket(zmq.DEALER)
 	defer workerSock.Close()
+
+	db.Init()
 
 	workerListener := fmt.Sprintf("tcp://%s:%d", config.ListenAddr, config.WorkerPort)
 	_ = workerSock.Bind(workerListener)
