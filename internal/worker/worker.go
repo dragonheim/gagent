@@ -26,6 +26,7 @@ var (
  anything about the network structure. Instead they know only to which
  router(s) they are connected. The worker will execute the agent code and
  pass the agent and it's results to a router.
+ Main is the entrypoint for the worker process
 */
 func Main(wg *sync.WaitGroup, config gstructs.GagentConfig) {
 	log.Printf("[INFO] Starting worker\n")

@@ -22,6 +22,7 @@ import (
  requests to a router. If started without arguments, the client
  will contact the router and attempt to retrieve the results
  of it's most recent request.
+ Main is the entrypoint for the client process
 */
 func Main(wg *sync.WaitGroup, config gstructs.GagentConfig) {
 	log.Printf("[INFO] Starting client\n")

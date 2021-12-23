@@ -11,6 +11,9 @@ import (
 	hclwrite "github.com/hashicorp/hcl/v2/hclwrite"
 )
 
+/*
+ Main is the entrypoint for the setup process
+*/
 func Main(wg *sync.WaitGroup, config gs.GagentConfig) {
 	log.Printf("[INFO] Starting setup\n")
 	defer wg.Done()

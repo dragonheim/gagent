@@ -4,16 +4,50 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"testing"
 )
 
-func ArityErr(i *Interp, name string, argv []string) error {
+func arityErr(i *Interp, name string, argv []string) error {
 	return fmt.Errorf("wrong number of args for %s %s", name, argv)
+}
+
+/*
+ needleInHaystack returns true if the string is in a slice
+*/
+func needleInHaystack(needle string, haystack []string) bool {
+	for _, haystackMember := range haystack {
+		if haystackMember == needle {
+			return true
+		}
+	}
+	return false
+}
+
+/*
+ TestneedleInHaystack tests the return value of needleInHaystack
+*/
+func TestneedleInHaystack(t *testing.T) {
+	var haystack = []string{"a", "b", "c"}
+	var needle = "a"
+	if !needleInHaystack(needle, haystack) {
+		t.Errorf("%s not in %s", needle, haystack)
+	}
+
+	needle = "j"
+	if needleInHaystack(needle, haystack) {
+		t.Errorf("%s in %s", needle, haystack)
+	}
+
+	needle = "ab"
+	if needleInHaystack(needle, haystack) {
+		t.Errorf("%s in %s", needle, haystack)
+	}
 }
 
 // CommandMath is the math command for TCL
 func CommandMath(i *Interp, argv []string, pd interface{}) (string, error) {
 	if len(argv) != 3 {
-		return "", ArityErr(i, argv[0], argv)
+		return "", arityErr(i, argv[0], argv)
 	}
 	a, _ := strconv.Atoi(argv[1])
 	b, _ := strconv.Atoi(argv[2])
@@ -60,7 +94,7 @@ func CommandMath(i *Interp, argv []string, pd interface{}) (string, error) {
 // CommandSet is the set command for TCL
 func CommandSet(i *Interp, argv []string, pd interface{}) (string, error) {
 	if len(argv) != 3 {
-		return "", ArityErr(i, argv[0], argv)
+		return "", arityErr(i, argv[0], argv)
 	}
 	i.SetVar(argv[1], argv[2])
 	return argv[2], nil
@@ -69,7 +103,7 @@ func CommandSet(i *Interp, argv []string, pd interface{}) (string, error) {
 // CommandUnset is the unset command for TCL
 func CommandUnset(i *Interp, argv []string, pd interface{}) (string, error) {
 	if len(argv) != 2 {
-		return "", ArityErr(i, argv[0], argv)
+		return "", arityErr(i, argv[0], argv)
 	}
 	i.UnsetVar(argv[1])
 	return "", nil
@@ -78,7 +112,7 @@ func CommandUnset(i *Interp, argv []string, pd interface{}) (string, error) {
 // CommandIf is the if command for TCL
 func CommandIf(i *Interp, argv []string, pd interface{}) (string, error) {
 	if len(argv) != 3 && len(argv) != 5 {
-		return "", ArityErr(i, argv[0], argv)
+		return "", arityErr(i, argv[0], argv)
 	}
 
 	result, err := i.Eval(argv[1])
@@ -98,7 +132,7 @@ func CommandIf(i *Interp, argv []string, pd interface{}) (string, error) {
 // CommandWhile is the while command for TCL
 func CommandWhile(i *Interp, argv []string, pd interface{}) (string, error) {
 	if len(argv) != 3 {
-		return "", ArityErr(i, argv[0], argv)
+		return "", arityErr(i, argv[0], argv)
 	}
 
 	for {
@@ -125,7 +159,7 @@ func CommandWhile(i *Interp, argv []string, pd interface{}) (string, error) {
 // CommandRetCodes is a function to get the return codes for TCL
 func CommandRetCodes(i *Interp, argv []string, pd interface{}) (string, error) {
 	if len(argv) != 1 {
-		return "", ArityErr(i, argv[0], argv)
+		return "", arityErr(i, argv[0], argv)
 	}
 	switch argv[0] {
 	case "break":
@@ -173,7 +207,7 @@ func CommandCallProc(i *Interp, argv []string, pd interface{}) (string, error) {
 // CommandProc is a function to register proc commands for TCL
 func CommandProc(i *Interp, argv []string, pd interface{}) (string, error) {
 	if len(argv) != 4 {
-		return "", ArityErr(i, argv[0], argv)
+		return "", arityErr(i, argv[0], argv)
 	}
 	return "", i.RegisterCommand(argv[1], CommandCallProc, []string{argv[2], argv[3]})
 }
@@ -181,7 +215,7 @@ func CommandProc(i *Interp, argv []string, pd interface{}) (string, error) {
 // CommandReturn is a function to register return codes for commands for TCL
 func CommandReturn(i *Interp, argv []string, pd interface{}) (string, error) {
 	if len(argv) != 1 && len(argv) != 2 {
-		return "", ArityErr(i, argv[0], argv)
+		return "", arityErr(i, argv[0], argv)
 	}
 	var r string
 	if len(argv) == 2 {
@@ -193,7 +227,7 @@ func CommandReturn(i *Interp, argv []string, pd interface{}) (string, error) {
 // CommandError is a function to return error codes for commands for TCL
 func CommandError(i *Interp, argv []string, pd interface{}) (string, error) {
 	if len(argv) != 1 && len(argv) != 2 {
-		return "", ArityErr(i, argv[0], argv)
+		return "", arityErr(i, argv[0], argv)
 	}
 	return "", fmt.Errorf(argv[1])
 }

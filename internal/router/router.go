@@ -17,7 +17,7 @@ import (
 
 var (
 	opsProcessed = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "client_requests_recieved",
+		Name: "client_requests_received",
 	})
 
 	db gcdb.GagentDb
@@ -29,6 +29,7 @@ var (
  list of tags and passing the agent and it's storage to either a member
  or client node. Tags are used by the agent to give hints as to where
  it should be routed.
+ Main is the entrypoint for the router
 */
 func Main(wg *sync.WaitGroup, config gstructs.GagentConfig) {
 	log.Printf("[INFO] Starting router\n")
