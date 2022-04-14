@@ -48,12 +48,21 @@ mode = "router"
 // listenaddr =  0.0.0.0
 
 /*
- * This is the port to the router will listen for on
- * for clients. It defaults to 35570.
+ * This is the port to G'Agent will listen for on
+ * for Prometheus queries. It defaults to 9101.
+ * Monitoring will be disabled if this is set to 0.
  *
  * Optional.
  */
-// clientport = 35571
+//  monitorport = 9101
+
+/*
+ * This is the port to the router will listen for on
+ * for clients. It defaults to 35572.
+ *
+ * Optional.
+ */
+// clientport = 35572
 
 /*
  * This is the port to the router will listen for on
@@ -69,7 +78,7 @@ mode = "router"
  *
  * Optional.
  */
-// workerport = 35572
+// workerport = 35571
 
 /*
  * @TODO

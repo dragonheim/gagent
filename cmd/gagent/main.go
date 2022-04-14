@@ -151,25 +151,25 @@ func init() {
 	config.MonitorPort = 9101
 
 	/*
-	 * By default, G'Agent client will use port 35571 to communicate with the
+	 * By default, G'Agent client will use port 35572 to communicate with the
 	 * routers, but you can override it by setting the clientport in the
 	 * configuration file
 	 */
-	config.ClientPort = 35571
+	config.ClientPort = 35572
 
 	/*
-	 * By default, G'Agent router will use port 35572 to communicate with
+	 * By default, G'Agent router will use port 35570 to communicate with
 	 * other routers, but you can override it by setting the routerport in
 	 * the configuration file
 	 */
 	config.RouterPort = 35570
 
 	/*
-	 * By default, G'Agent worker will use port 35570 to communicate with the
+	 * By default, G'Agent worker will use port 35571 to communicate with the
 	 * routers, but you can override it by setting the workerport in the
 	 * configuration file
 	 */
-	config.WorkerPort = 35572
+	config.WorkerPort = 35571
 
 	config.Clients = make([]*gstructs.ClientDetails, 0)
 	config.Routers = make([]*gstructs.RouterDetails, 0)
@@ -265,6 +265,10 @@ func init() {
 	/*
 	 * Start Prometheus metrics exporter
 	 */
-	go http.ListenAndServe(fmt.Sprintf("%s:%d", config.ListenAddr, config.MonitorPort), nil)
-
+	if config.MonitorPort != 0 {
+		go func() {
+			log.Printf("[INFO] Starting Prometheus metrics exporter on port %d\n", config.MonitorPort)
+			log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%d", config.ListenAddr, config.MonitorPort), nil))
+		}()
+	}
 }
