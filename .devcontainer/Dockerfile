@@ -4,6 +4,8 @@
 ARG VARIANT="1.18"
 FROM mcr.microsoft.com/vscode/devcontainers/go:0-${VARIANT}
 
+COPY --from=aquasec/trivy:0.25.4 /usr/local/bin/trivy /usr/bin/trivy
+
 # [Choice] Node.js version: none, lts/*, 16, 14, 12, 10
 ARG NODE_VERSION="none"
 RUN if [ "${NODE_VERSION}" != "none" ]; then su vscode -c "umask 0002 && . /usr/local/share/nvm/nvm.sh && nvm install ${NODE_VERSION} 2>&1"; fi
