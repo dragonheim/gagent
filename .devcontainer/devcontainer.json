@@ -29,6 +29,8 @@
 		"GitHub.copilot",
 		"GitHub.vscode-pull-request-github",
 		"wholroyd.hcl",
+    		"GitHub.vscode-pull-request-github",
+    		"hashicorp.terraform"
 	],
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
@@ -38,17 +40,17 @@
 	// Use 'portsAttributes' to set default properties for specific forwarded ports. More info: https://code.visualstudio.com/docs/remote/devcontainerjson-reference.
 	"portsAttributes": {
 		"9101": {
-			"label": "Prometheus",
+			"label": "Prometheus"
 		},
 		"35570": {
-			"label": "Router To Router",
+			"label": "Router To Router"
 		},
 		"35571": {
-			"label": "Worker To Router",
+			"label": "Worker To Router"
 		},
 		"35572": {
-			"label": "Client To Router",
-		},
+			"label": "Client To Router"
+		}
 	},
 
 	// Use 'otherPortsAttributes' to configure any ports that aren't configured using 'portsAttributes'.

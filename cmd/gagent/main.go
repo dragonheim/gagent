@@ -7,9 +7,9 @@ import (
 	os "os"
 	sync "sync"
 
-	fqdn "github.com/Showmax/go-fqdn"
-
 	autorestart "github.com/slayer/autorestart"
+
+	fqdn "github.com/Showmax/go-fqdn"
 
 	gstructs "git.dragonheim.net/dragonheim/gagent/internal/gstructs"
 
@@ -30,7 +30,7 @@ import (
 )
 
 var (
-	semVER = "0.0.4"
+	semVER = "0.0.5"
 )
 
 var (
@@ -77,6 +77,8 @@ func main() {
 			os.Exit(7)
 		}
 
+		// cs.Client.ConsulRegister("gagent-router", config.RouterPort)
+
 		wg.Add(1)
 		go gr.Main(&wg, config)
 
@@ -87,6 +89,8 @@ func main() {
 			log.Printf("[ERROR] No routers defined.\n")
 			os.Exit(6)
 		}
+
+		// cs.Client.ConsulRegister("gagent-worker", config.WorkerPort)
 
 		wg.Add(1)
 		go gw.Main(&wg, config)
