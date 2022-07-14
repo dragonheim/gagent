@@ -143,35 +143,28 @@ func init() {
 	config.UUID = uuid.NewV4UUID().String()
 
 	/*
-	 * By default, we want to listen on all IP addresses. It can be overridden
-	 * in the configuration file by setting listenaddr
+	 * By default, we want to listen on all IP addresses.
 	 */
 	config.ListenAddr = "0.0.0.0"
 
 	/*
-	 * By default, G'Agent will use port 9101 or monitoring via prometheus.
-	 * It can be overridden in the configuration file by setting clientport
+	 * G'Agent will use this port for monitoring via prometheus., If set
+	 * is set to 0, G'Agent will not listen for prometheus metrics.
 	 */
 	config.MonitorPort = 9101
 
 	/*
-	 * By default, G'Agent client will use port 35572 to communicate with the
-	 * routers, but you can override it by setting the clientport in the
-	 * configuration file
+	 * G'Agent client will use this port to communicate with the routers.
 	 */
 	config.ClientPort = 35572
 
 	/*
-	 * By default, G'Agent router will use port 35570 to communicate with
-	 * other routers, but you can override it by setting the routerport in
-	 * the configuration file
+	 * G'Agent router will use this port to communicate with other routers.
 	 */
 	config.RouterPort = 35570
 
 	/*
-	 * By default, G'Agent worker will use port 35571 to communicate with the
-	 * routers, but you can override it by setting the workerport in the
-	 * configuration file
+	 * G'Agent worker will use this port to communicate with the routers.
 	 */
 	config.WorkerPort = 35571
 

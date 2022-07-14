@@ -28,7 +28,8 @@ func NewConsulClient(addr string) (Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &client{consul: c}, nil
+	return &client{c}, nil
+	//return &client{consul: c}, nil
 }
 
 // Register a service with consul local agent
@@ -51,10 +52,10 @@ func (c *client) Service(service, tag string) ([]*consul.ServiceEntry, *consul.Q
 	passingOnly := true
 	addrs, meta, err := c.consul.Health().Service(service, tag, passingOnly, nil)
 	if len(addrs) == 0 && err == nil {
-		return nil, fmt.Errorf("service ( %s ) was not found", service)
+		return nil, nil, fmt.Errorf("service ( %s ) was not found", service)
 	}
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	return addrs, meta, nil
 }

@@ -2,6 +2,7 @@ package client
 
 import (
 	sha "crypto/sha256"
+	hex "encoding/hex"
 	fmt "fmt"
 	ioutil "io/ioutil"
 	log "log"
@@ -40,9 +41,10 @@ func Main(wg *sync.WaitGroup, config gstructs.GagentConfig) {
 		log.Printf("[DEBUG] Agent file contents: \n----- -----\n%s\n----- -----\n", agent.ScriptCode)
 	}
 	agent.Client = config.UUID
-	agent.Shasum = fmt.Sprintf("%s", sha.Sum256(agent.ScriptCode))
+	tmpsum := sha.Sum256([]byte(agent.ScriptCode))
+	agent.Shasum = fmt.Sprintf("%v", hex.EncodeToString(tmpsum[:]))
 	log.Printf("[INFO] SHA256 of Agent file: %s", agent.Shasum)
-	agent.Status = "loaded"
+	agent.Status = 1
 	agent.Hints = getTagsFromHints(agent)
 	agent.Answer = nil
 

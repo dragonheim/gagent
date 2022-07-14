@@ -24,16 +24,14 @@ type GagentConfig struct {
  */
 type ClientDetails struct {
 	/*
-	 * Client name for display purposes in logs and
-	 * diagnostics.
+	 * Client name for display purposes in logs and diagnostics.
 	 */
 	ClientName string `hcl:",label"`
 
 	/*
-	 * UUID String for the client node.  This is used by
-	 * the router to determine which MQ client to send
-	 * the agent's results to. This attempts to keep the
-	 * clients unique globally.
+	 * UUID String for the client node.  This is used by the router to
+	 * determine which MQ client to send the agent's results to. This
+	 * attempts to keep the clients unique globally.
 	 */
 	ClientID string `hcl:"clientid,optional"`
 }
@@ -43,52 +41,44 @@ type ClientDetails struct {
  */
 type RouterDetails struct {
 	/*
-	 * Router name for display purposes in logs and
-	 * diagnostics
+	 * Router name for display purposes in logs and diagnostics.
 	 */
 	RouterName string `hcl:",label"`
 
 	/*
-	 * UUID String for the router node.  This is used by
-	 * the clients, routers, and workers to determine
-	 * which MQ router to send the agent's requests to.
-	 * This attempts to keep the routers unique globally.
+	 * UUID String for the router node.  This is used by the clients,
+	 * routers, and workers to determine which MQ router to send the
+	 * agent's requests to. This attempts to keep the routers unique
+	 * globally.
 	 */
 	RouterID string `hcl:"routerid,attr"`
 
 	/*
-	 * This is the IP address or hostname the router
-	 * will listen on.  The router will start up a 0MQ
-	 * service that clients and workers will connect to.
+	 * This is the IP address or hostname the router will listen on. The
+	 * router will start up a 0MQ service that clients and workers will
+	 * connect to.
 	 */
 	RouterAddr string `hcl:"address,attr"`
 
 	/*
-	 * This is the is the port that the router listens
-	 * on for clients. If not defined, it will default
-	 * to 35571.
+	 * G'Agent client will use this port to communicate with the routers.
 	 */
 	ClientPort int64 `hcl:"clientport,optional"`
 
 	/*
-	 * This is the is the port that the router listens
-	 * on for routers. If not defined, it will default
-	 * to 35570.
+	 * G'Agent router will use this port to communicate with other routers.
 	 */
 	RouterPort int64 `hcl:"routerport,optional"`
 
 	/*
-	 * This is the is the port that the router listens
-	 * on for clients. If not defined, it will default
-	 * to 35572.
+	 * G'Agent worker will use this port to communicate with the routers.
 	 */
 	WorkerPort int64 `hcl:"workerport,optional"`
 
 	/*
-	 * These tags will be passed to the router upon
-	 * connection.  The router will then use these
-	 * tags to help determine which worker / client
-	 * to send the client's requests and results to.
+	 * These tags will be passed to the router upon connection. The router
+	 * will then use these tags to help determine which worker / client to
+	 * send the client's requests and results to.
 	 */
 	RouterTags []string `hcl:"tags,optional"`
 }
@@ -98,33 +88,30 @@ type RouterDetails struct {
  */
 type WorkerDetails struct {
 	/*
-	 * Router name for display purposes in logs and
-	 * diagnostics
+	 * Router name for display purposes in logs and diagnostics.
 	 */
 	WorkerName string `hcl:",label"`
 
 	/*
-	 * UUID String for the worker node.  This is used
-	 * by the router to determine which MQ client to
-	 * send agents to. This attempts to keep the
-	 * workers unique globally.
+	 * UUID String for the worker node. This is used by the router to
+	 * determine which MQ client to send agents to. This attempts to keep
+	 * the workers unique globally.
 	 */
 	WorkerID string `hcl:"workerid,attr"`
 
 	/*
-	 * These tags will be passed to the router upon
-	 * connection.  The router will then use these
-	 * tags to help determine which worker / client
-	 * to send the agent and it's results to.
+	 * These tags will be passed to the router upon connection. The router
+	 * will then use these tags to help determine which worker / client to
+	 * send the agent and it's results to.
 	 */
 	WorkerTags []string `hcl:"tags,optional"`
 }
 
 type AgentDetails struct {
 	Client     string `hcl:"client"`
+	Status     int64  `hcl:"status"`
 	Shasum     string `hcl:"shasum"`
-	Status     string `hcl:"status"`
-	ScriptCode []byte
 	Hints      []string
+	ScriptCode []byte
 	Answer     []byte
 }
