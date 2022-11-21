@@ -30,7 +30,7 @@ steps:
           - refs/tags/**
 
   - name: Validate code base and dependencies
-    image: dragonheim/golang:1.17
+    image: dragonheim/golang:latest
     volumes:
       - name: dockersock
         path: /var/run/docker.sock
@@ -86,7 +86,7 @@ steps:
       - echo "running"
 
   - name: Build and push container
-    image: dragonheim/golang:1.17
+    image: dragonheim/golang:latest
     volumes:
       - name: dockersock
         path: /var/run/docker.sock
