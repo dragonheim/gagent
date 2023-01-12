@@ -12,18 +12,18 @@ import (
 	sync "sync"
 	time "time"
 
-	gstructs "git.dragonheim.net/dragonheim/gagent/internal/gstructs"
+	gstructs "github.com/dragonheim/gagent/internal/gstructs"
 
 	zmq "github.com/pebbe/zmq4"
 )
 
 /*
- Client mode will send an agent file to a router for processing
- Clients do not process the agent files, only send them as
- requests to a router. If started without arguments, the client
- will contact the router and attempt to retrieve the results
- of it's most recent request.
- Main is the entrypoint for the client process
+Client mode will send an agent file to a router for processing
+Clients do not process the agent files, only send them as
+requests to a router. If started without arguments, the client
+will contact the router and attempt to retrieve the results
+of it's most recent request.
+Main is the entrypoint for the client process
 */
 func Main(wg *sync.WaitGroup, config gstructs.GagentConfig) {
 	log.Printf("[INFO] Starting client\n")

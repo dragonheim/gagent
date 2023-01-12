@@ -5,9 +5,9 @@ import (
 	log "log"
 	sync "sync"
 
-	gstructs "git.dragonheim.net/dragonheim/gagent/internal/gstructs"
+	gstructs "github.com/dragonheim/gagent/internal/gstructs"
 
-	// picol "git.dragonheim.net/dragonheim/gagent/src/picol"
+	// picol "github.com/dragonheim/gagent/src/picol"
 
 	prometheus "github.com/prometheus/client_golang/prometheus"
 	promauto "github.com/prometheus/client_golang/prometheus/promauto"
@@ -22,11 +22,11 @@ var (
 )
 
 /*
- The "worker" processes the agent code. The worker nodes do not know
- anything about the network structure. Instead they know only to which
- router(s) they are connected. The worker will execute the agent code and
- pass the agent and it's results to a router.
- Main is the entrypoint for the worker process
+The "worker" processes the agent code. The worker nodes do not know
+anything about the network structure. Instead they know only to which
+router(s) they are connected. The worker will execute the agent code and
+pass the agent and it's results to a router.
+Main is the entrypoint for the worker process
 */
 func Main(wg *sync.WaitGroup, config gstructs.GagentConfig) {
 	log.Printf("[INFO] Starting worker\n")

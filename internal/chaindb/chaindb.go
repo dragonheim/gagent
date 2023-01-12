@@ -6,7 +6,7 @@ import (
 	log "log"
 	time "time"
 
-	gstructs "git.dragonheim.net/dragonheim/gagent/internal/gstructs"
+	gstructs "github.com/dragonheim/gagent/internal/gstructs"
 
 	hclsimple "github.com/hashicorp/hcl/v2/hclsimple"
 	// hclwrite "github.com/hashicorp/hcl/v2/hclwrite"

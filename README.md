@@ -3,7 +3,7 @@
 [![License](https://img.shields.io/badge/License-MIT-limegreen.svg)](https://github.com/dragonheim/gagent/src/branch/main/LICENSE)
 
 [![Build Status](https://drone.dragonheim.net/api/badges/dragonheim/gagent/status.svg)](https://drone.dragonheim.net/dragonheim/gagent)
-[![Go Report Card](https://goreportcard.com/badge/git.dragonheim.net/dragonheim/gagent)](https://goreportcard.com/report/git.dragonheim.net/dragonheim/gagent)
+[![Go Report Card](https://goreportcard.com/badge/github.com/dragonheim/gagent)](https://goreportcard.com/report/github.com/dragonheim/gagent)
 [![Docker Pulls](https://img.shields.io/docker/pulls/dragonheim/gagent)](https://hub.docker.com/r/dragonheim/gagent/tags?page=1&ordering=last_updated)
 
 A Golang based mobile agent system loosely inspired by the [Agent Tcl / D'Agents](http://www.cs.dartmouth.edu/~dfk/agents/) system created by Robert S. Gray of Dartmouth college.
@@ -34,4 +34,4 @@ Line  8 executes the hello_earth procedure defined above.
 
 
 ## History
-More information about Agent TCL / D'Agents can be found in the original [documentation](http://www.cs.dartmouth.edu/~dfk/agents/pub/agents/doc.5.1.ps.gz), and in the project's [wiki](https://git.dragonheim.net/dragonheim/gagent/wiki/_pages).
+More information about Agent TCL / D'Agents can be found in the original [documentation](http://www.cs.dartmouth.edu/~dfk/agents/pub/agents/doc.5.1.ps.gz), and in the project's [wiki](https://github.com/dragonheim/gagent/wiki/_pages).

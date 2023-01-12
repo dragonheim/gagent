@@ -11,12 +11,12 @@ import (
 
 	fqdn "github.com/Showmax/go-fqdn"
 
-	gstructs "git.dragonheim.net/dragonheim/gagent/internal/gstructs"
+	gstructs "github.com/dragonheim/gagent/internal/gstructs"
 
-	gc "git.dragonheim.net/dragonheim/gagent/internal/client"
-	gr "git.dragonheim.net/dragonheim/gagent/internal/router"
-	gs "git.dragonheim.net/dragonheim/gagent/internal/setup"
-	gw "git.dragonheim.net/dragonheim/gagent/internal/worker"
+	gc "github.com/dragonheim/gagent/internal/client"
+	gr "github.com/dragonheim/gagent/internal/router"
+	gs "github.com/dragonheim/gagent/internal/setup"
+	gw "github.com/dragonheim/gagent/internal/worker"
 
 	docopt "github.com/aviddiviner/docopt-go"
 
@@ -30,7 +30,7 @@ import (
 )
 
 var (
-	semVER = "0.0.5"
+	semVER = "0.0.6"
 )
 
 var (

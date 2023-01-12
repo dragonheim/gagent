@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	picol "git.dragonheim.net/dragonheim/gagent/src/picol"
+	picol "github.com/dragonheim/gagent/src/picol"
 )
 
 var fname = flag.String("f", "", "file name")

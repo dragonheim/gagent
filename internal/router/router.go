@@ -6,8 +6,8 @@ import (
 	http "net/http"
 	sync "sync"
 
-	gcdb "git.dragonheim.net/dragonheim/gagent/internal/chaindb"
-	gstructs "git.dragonheim.net/dragonheim/gagent/internal/gstructs"
+	gcdb "github.com/dragonheim/gagent/internal/chaindb"
+	gstructs "github.com/dragonheim/gagent/internal/gstructs"
 
 	prometheus "github.com/prometheus/client_golang/prometheus"
 	promauto "github.com/prometheus/client_golang/prometheus/promauto"
@@ -24,12 +24,12 @@ var (
 )
 
 /*
- The 'router' processes routing requests from the agent.  The router does
- not handle any of the agent activities beyond processing the agent's
- list of tags and passing the agent and it's storage to either a member
- or client node. Tags are used by the agent to give hints as to where
- it should be routed.
- Main is the entrypoint for the router
+The 'router' processes routing requests from the agent.  The router does
+not handle any of the agent activities beyond processing the agent's
+list of tags and passing the agent and it's storage to either a member
+or client node. Tags are used by the agent to give hints as to where
+it should be routed.
+Main is the entrypoint for the router
 */
 func Main(wg *sync.WaitGroup, config gstructs.GagentConfig) {
 	log.Printf("[INFO] Starting router\n")
