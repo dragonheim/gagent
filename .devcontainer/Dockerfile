@@ -1,7 +1,7 @@
 # See here for image contents: https://github.com/microsoft/vscode-dev-containers/tree/v0.194.3/containers/go/.devcontainer/base.Dockerfile
 
 # [Choice] Go version: 1, 1.16, 1.17
-ARG VARIANT="1.19"
+ARG VARIANT="1.20"
 FROM mcr.microsoft.com/vscode/devcontainers/go:0-${VARIANT}
 
 COPY --from=aquasec/trivy:0.32.1 /usr/local/bin/trivy /usr/bin/trivy

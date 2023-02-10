@@ -9,6 +9,8 @@ import (
 
 	autorestart "github.com/slayer/autorestart"
 
+	env "github.com/caarlos0/env/v6"
+
 	fqdn "github.com/Showmax/go-fqdn"
 
 	gstructs "github.com/dragonheim/gagent/internal/gstructs"
@@ -51,6 +53,12 @@ var (
  *  9 Agent hints / tags not defined
  * 10 Router not connected
  */
+
+var environment struct {
+	Mode string `env:"GAGENT_MODE" envDefault:"setup"`
+	Port int    `env:"PORT" envDefault:"3000"`
+	UUID string `env:"GAGENT_UUID" envDefault:""`
+}
 
 var config gstructs.GagentConfig
 
@@ -112,8 +120,14 @@ func main() {
 
 func init() {
 	// var err error
-
 	autorestart.StartWatcher()
+
+	cfg := environment
+	if err := env.Parse(&cfg); err != nil {
+		log.Printf("%+v\n", err)
+	}
+
+	log.Printf("%+v\n", cfg)
 
 	filter := &logutils.LevelFilter{
 		Levels:   []logutils.LogLevel{"DEBUG", "INFO", "WARN", "ERROR"},

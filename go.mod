@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/Showmax/go-fqdn v1.0.0
 	github.com/aviddiviner/docopt-go v0.0.0-20170807220726-d8a1d67efc6a
+	github.com/caarlos0/env/v6 v6.10.1
 	github.com/hashicorp/hcl/v2 v2.15.0
 	github.com/hashicorp/logutils v1.0.0
 	github.com/jakehl/goid v1.1.0
