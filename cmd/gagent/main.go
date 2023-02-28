@@ -31,14 +31,6 @@ import (
 	uuid "github.com/jakehl/goid"
 )
 
-var (
-	semVER = "0.0.6"
-)
-
-var (
-	wg sync.WaitGroup
-)
-
 /*
  * Exit Codes
  *  0 Success
@@ -60,8 +52,19 @@ var environment struct {
 	UUID string `env:"GAGENT_UUID" envDefault:""`
 }
 
+// This is the application version number. It can be overridden at build time
+// using the -ldflags "-X main.semVER=0.0.1" option.
+var semVER = "0.0.6"
+
+// This is the application configuration. It is populated from the configuration
+// file and then used throughout the application.
 var config gstructs.GagentConfig
 
+// We use a WaitGroup to wait for all goroutines to finish before exiting.
+var wg sync.WaitGroup
+
+// This is the main function, and it assumes that the configuration file has
+// already been read and parsed by the init() function.
 func main() {
 	log.Printf("[DEBUG] Configuration is %v\n", config)
 
@@ -85,8 +88,6 @@ func main() {
 			os.Exit(7)
 		}
 
-		// cs.Client.ConsulRegister("gagent-router", config.RouterPort)
-
 		wg.Add(1)
 		go gr.Main(&wg, config)
 
@@ -97,8 +98,6 @@ func main() {
 			log.Printf("[ERROR] No routers defined.\n")
 			os.Exit(6)
 		}
-
-		// cs.Client.ConsulRegister("gagent-worker", config.WorkerPort)
 
 		wg.Add(1)
 		go gw.Main(&wg, config)
@@ -118,6 +117,9 @@ func main() {
 	os.Exit(0)
 }
 
+// This is the init() function. It is called before the main() function, and
+// it reads the configuration file, parses the command line arguments, and
+// reads the environment variables. It also sets up the logging.
 func init() {
 	// var err error
 	autorestart.StartWatcher()
