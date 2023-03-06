@@ -1,5 +1,5 @@
 # G'Agent
-[![Maintained Status](https://img.shields.io/maintenance/yes/2021?style=plastic)](https://github.com/dragonheim/gagent)
+[![Maintained Status](https://img.shields.io/maintenance/yes/2023?style=plastic)](https://github.com/dragonheim/gagent)
 [![License](https://img.shields.io/badge/License-MIT-limegreen.svg)](https://github.com/dragonheim/gagent/src/branch/main/LICENSE)
 
 [![Build Status](https://drone.dragonheim.net/api/badges/dragonheim/gagent/status.svg)](https://drone.dragonheim.net/dragonheim/gagent)
