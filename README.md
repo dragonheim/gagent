@@ -8,11 +8,14 @@
 
 A Golang based mobile agent system loosely inspired by the [Agent Tcl / D'Agents](http://www.cs.dartmouth.edu/~dfk/agents/) system created by Robert S. Gray of Dartmouth college.
 
+## Sumary
+G'Agent streamlines interplanetary data searches using TCL scripts, allowing efficient communication despite time delays between Earth and Mars.
+
 ## Purpose
-As we move close and closer to a true space-age, we need to start thinking about solutions for various space-age issues such as the bi-directional time delay between the surface of Mars and the surface of Earth. At present it takes between 6 and 44 minutes for single round-trip, making most online data services unuseable. G'Agent is a potential solution for data services given the time delay.
+As we move closer and closer to a true space age, we need to start thinking about solutions for various space-age issues, such as the bi-directional time delay between the surface of Mars and the surface of Earth. At present, it takes between 6 and 44 minutes for a single round-trip, making most online data services unusable. G'Agent is a potential solution for data services given the time delay.
 
-Imagine, for a moment, that you are on Mars and need to perform a data search in a specific domain space. You would have to explain it to someone on Earth, and hope they understand enough of the domain space to know where to search and understand you well enough to perform the actual search and then send you the results. With G'Agent, instead you would write a basic script (TCL), hereafter called an agent, providing various hints about the domain space and the search as TCL code. Your client would then send it on to a server, hereafter called a router, on Earth. The router may or may not know anything about the domain space of your search, so the router will use the hints that you provide to attempt to route the agent to known workers or other routers closer to the desired domain space. Eventually your agent will reach a router whose workers can handle your search.  The workers, will take the agent, run the script portion and collect the response(s), returning the reponse(s) to the router(s) for return to your client.
 
+Imagine, for a moment, that you are on Mars and need to perform a data search in a specific domain space. You would have to explain it to someone on Earth, and hope they understand enough of the domain space to know where to search and understand you well enough to perform the actual search and then send you the results. With G'Agent, instead, you would write a basic script (TCL), hereafter called an agent, providing various hints about the domain space and the search as TCL code. Your client would then send it to a server, hereafter called a router, on Earth. The router may or may not know anything about the domain space of your search, so the router will use the hints that you provide to attempt to route the agent to known workers or other routers closer to the desired domain space. Eventually, your agent will reach a router whose workers can handle your search. The workers will take the agent, run the script portion, and collect the response(s), returning the response(s) to the router(s) for return to your client.
 ## Example Agent
 ```tcl
 1  : ###################
