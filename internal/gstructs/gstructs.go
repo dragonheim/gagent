@@ -7,8 +7,8 @@ type GagentConfig struct {
 	Name        string           `hcl:"name,optional"`
 	Mode        string           `hcl:"mode,attr"`
 	UUID        string           `hcl:"uuid,optional"`
-	MonitorPort int              `hcl:"monitorport,optional"`
 	ListenAddr  string           `hcl:"listenaddr,optional"`
+	MonitorPort int64            `hcl:"monitorport,optional"`
 	ClientPort  int64            `hcl:"clientport,optional"`
 	RouterPort  int64            `hcl:"routerport,optional"`
 	WorkerPort  int64            `hcl:"workerport,optional"`

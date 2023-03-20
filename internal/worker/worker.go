@@ -1,8 +1,8 @@
 package worker
 
 import (
-	fmt "fmt"
 	log "log"
+	strconv "strconv"
 	sync "sync"
 
 	gstructs "github.com/dragonheim/gagent/internal/gstructs"
@@ -43,13 +43,13 @@ func Main(wg *sync.WaitGroup, config gstructs.GagentConfig) {
 		/*
 		 * Generate connect string for this router.
 		 */
-		connectString := fmt.Sprintf("tcp://%s:%d", config.Routers[key].RouterAddr, rport)
+		connectString := "tcp://" + config.Routers[key].RouterAddr + ":" + strconv.FormatInt(rport, 10)
 
 		wg.Add(1)
 		go getAgent(wg, config.UUID, connectString)
 	}
 	/*
-	 * workerListener := fmt.Sprintf("tcp://%s:%d", config.ListenAddr, config.WorkerPort)
+	 * workerListener := "tcp://" + config.ListenAddr + ":" + strconv.FormatInt(config.WorkerPort, 10)
 	 */
 
 }

@@ -7,13 +7,13 @@ import (
 	"io/ioutil"
 	"os"
 
-	picol "github.com/dragonheim/gagent/src/picol"
+	picol "github.com/dragonheim/gagent/pkg/picol"
 )
 
 var fname = flag.String("f", "", "file name")
 
 // CommandPuts is a simple version of the TCL puts function.
-func CommandPuts(i *picol.Interp, argv []string, pd interface{}) (string, error) {
+func CommandPuts(i *picol.Interpreter, argv []string, pd interface{}) (string, error) {
 	if len(argv) != 2 {
 		return "", fmt.Errorf("wrong number of args for %s %s", argv[0], argv)
 	}
@@ -23,7 +23,7 @@ func CommandPuts(i *picol.Interp, argv []string, pd interface{}) (string, error)
 
 func main() {
 	flag.Parse()
-	interp := picol.InitInterp()
+	interp := picol.NewInterpreter()
 	interp.RegisterCoreCommands()
 	interp.RegisterCommand("puts", CommandPuts, nil)
 

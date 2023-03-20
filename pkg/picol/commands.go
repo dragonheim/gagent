@@ -7,13 +7,18 @@ import (
 	"testing"
 )
 
-func arityErr(i *Interp, name string, argv []string) error {
+/*
+ * incorrectArgCountError returns an error message indicating the incorrect
+ * number of arguments provided for a given function. It takes an interpreter
+ * instance 'i', the function name 'name', and a slice of argument values 'argv'.
+ */
+func incorrectArgCountError(i *Interpreter, name string, argv []string) error {
 	return fmt.Errorf("wrong number of args for %s %s", name, argv)
 }
 
 /*
- needleInHaystack returns true if the string is in a slice
-*/
+ * needleInHaystack returns true if the string is in a slice
+ */
 func needleInHaystack(needle string, haystack []string) bool {
 	for _, haystackMember := range haystack {
 		if haystackMember == needle {
@@ -24,9 +29,9 @@ func needleInHaystack(needle string, haystack []string) bool {
 }
 
 /*
- TestneedleInHaystack tests the return value of needleInHaystack
-*/
-func TestneedleInHaystack(t *testing.T) {
+ * Test_needleInHaystack tests the return value of needleInHaystack
+ */
+func Test_needleInHaystack(t *testing.T) {
 	var haystack = []string{"a", "b", "c"}
 	var needle = "a"
 	if !needleInHaystack(needle, haystack) {
@@ -44,10 +49,12 @@ func TestneedleInHaystack(t *testing.T) {
 	}
 }
 
-// CommandMath is the math command for TCL
-func CommandMath(i *Interp, argv []string, pd interface{}) (string, error) {
+/*
+ * CommandMath is the math command for TCL
+ */
+func CommandMath(i *Interpreter, argv []string, pd interface{}) (string, error) {
 	if len(argv) != 3 {
-		return "", arityErr(i, argv[0], argv)
+		return "", incorrectArgCountError(i, argv[0], argv)
 	}
 	a, _ := strconv.Atoi(argv[1])
 	b, _ := strconv.Atoi(argv[2])
@@ -91,28 +98,34 @@ func CommandMath(i *Interp, argv []string, pd interface{}) (string, error) {
 	return fmt.Sprintf("%d", c), nil
 }
 
-// CommandSet is the set command for TCL
-func CommandSet(i *Interp, argv []string, pd interface{}) (string, error) {
+/*
+ * CommandSet is the set command for TCL
+ */
+func CommandSet(i *Interpreter, argv []string, pd interface{}) (string, error) {
 	if len(argv) != 3 {
-		return "", arityErr(i, argv[0], argv)
+		return "", incorrectArgCountError(i, argv[0], argv)
 	}
-	i.SetVar(argv[1], argv[2])
+	i.SetVariable(argv[1], argv[2])
 	return argv[2], nil
 }
 
-// CommandUnset is the unset command for TCL
-func CommandUnset(i *Interp, argv []string, pd interface{}) (string, error) {
+/*
+ * CommandUnset is the unset command for TCL
+ */
+func CommandUnset(i *Interpreter, argv []string, pd interface{}) (string, error) {
 	if len(argv) != 2 {
-		return "", arityErr(i, argv[0], argv)
+		return "", incorrectArgCountError(i, argv[0], argv)
 	}
-	i.UnsetVar(argv[1])
+	i.UnsetVariable(argv[1])
 	return "", nil
 }
 
-// CommandIf is the if command for TCL
-func CommandIf(i *Interp, argv []string, pd interface{}) (string, error) {
+/*
+ * CommandIf is the if command for TCL
+ */
+func CommandIf(i *Interpreter, argv []string, pd interface{}) (string, error) {
 	if len(argv) != 3 && len(argv) != 5 {
-		return "", arityErr(i, argv[0], argv)
+		return "", incorrectArgCountError(i, argv[0], argv)
 	}
 
 	result, err := i.Eval(argv[1])
@@ -129,10 +142,12 @@ func CommandIf(i *Interp, argv []string, pd interface{}) (string, error) {
 	return result, nil
 }
 
-// CommandWhile is the while command for TCL
-func CommandWhile(i *Interp, argv []string, pd interface{}) (string, error) {
+/*
+ * CommandWhile is the while command for TCL
+ */
+func CommandWhile(i *Interpreter, argv []string, pd interface{}) (string, error) {
 	if len(argv) != 3 {
-		return "", arityErr(i, argv[0], argv)
+		return "", incorrectArgCountError(i, argv[0], argv)
 	}
 
 	for {
@@ -143,9 +158,11 @@ func CommandWhile(i *Interp, argv []string, pd interface{}) (string, error) {
 		if r, _ := strconv.Atoi(result); r != 0 {
 			result, err := i.Eval(argv[2])
 			switch err {
-			case errContinue, nil:
-				//pass
-			case errBreak:
+			case ErrContinue, nil:
+				/*
+				 * pass
+				 */
+			case ErrBreak:
 				return result, nil
 			default:
 				return result, err
@@ -156,22 +173,26 @@ func CommandWhile(i *Interp, argv []string, pd interface{}) (string, error) {
 	}
 }
 
-// CommandRetCodes is a function to get the return codes for TCL
-func CommandRetCodes(i *Interp, argv []string, pd interface{}) (string, error) {
+/*
+ * CommandRetCodes is a function to get the return codes for TCL
+ */
+func CommandRetCodes(i *Interpreter, argv []string, pd interface{}) (string, error) {
 	if len(argv) != 1 {
-		return "", arityErr(i, argv[0], argv)
+		return "", incorrectArgCountError(i, argv[0], argv)
 	}
 	switch argv[0] {
 	case "break":
-		return "", errBreak
+		return "", ErrBreak
 	case "continue":
-		return "", errContinue
+		return "", ErrContinue
 	}
 	return "", nil
 }
 
-// CommandCallProc is a function to call proc commands for TCL
-func CommandCallProc(i *Interp, argv []string, pd interface{}) (string, error) {
+/*
+ * CommandCallProc is a function to call proc commands for TCL
+ */
+func CommandCallProc(i *Interpreter, argv []string, pd interface{}) (string, error) {
 	var x []string
 
 	if pd, ok := pd.([]string); ok {
@@ -180,7 +201,7 @@ func CommandCallProc(i *Interp, argv []string, pd interface{}) (string, error) {
 		return "", nil
 	}
 
-	i.callframe = &CallFrame{vars: make(map[string]Var), parent: i.callframe}
+	i.callframe = &CallFrame{vars: make(map[string]Variable), parent: i.callframe}
 	defer func() { i.callframe = i.callframe.parent }() // remove the called proc callframe
 
 	arity := 0
@@ -189,7 +210,7 @@ func CommandCallProc(i *Interp, argv []string, pd interface{}) (string, error) {
 			continue
 		}
 		arity++
-		i.SetVar(arg, argv[arity])
+		i.SetVariable(arg, argv[arity])
 	}
 
 	if arity != len(argv)-1 {
@@ -198,42 +219,50 @@ func CommandCallProc(i *Interp, argv []string, pd interface{}) (string, error) {
 
 	body := x[1]
 	result, err := i.Eval(body)
-	if err == errReturn {
+	if err == ErrReturn {
 		err = nil
 	}
 	return result, err
 }
 
-// CommandProc is a function to register proc commands for TCL
-func CommandProc(i *Interp, argv []string, pd interface{}) (string, error) {
+/*
+ * CommandProc is a function to register proc commands for TCL
+ */
+func CommandProc(i *Interpreter, argv []string, pd interface{}) (string, error) {
 	if len(argv) != 4 {
-		return "", arityErr(i, argv[0], argv)
+		return "", incorrectArgCountError(i, argv[0], argv)
 	}
 	return "", i.RegisterCommand(argv[1], CommandCallProc, []string{argv[2], argv[3]})
 }
 
-// CommandReturn is a function to register return codes for commands for TCL
-func CommandReturn(i *Interp, argv []string, pd interface{}) (string, error) {
+/*
+ * CommandReturn is a function to register return codes for commands for TCL
+ */
+func CommandReturn(i *Interpreter, argv []string, pd interface{}) (string, error) {
 	if len(argv) != 1 && len(argv) != 2 {
-		return "", arityErr(i, argv[0], argv)
+		return "", incorrectArgCountError(i, argv[0], argv)
 	}
 	var r string
 	if len(argv) == 2 {
 		r = argv[1]
 	}
-	return r, errReturn
+	return r, ErrReturn
 }
 
-// CommandError is a function to return error codes for commands for TCL
-func CommandError(i *Interp, argv []string, pd interface{}) (string, error) {
+/*
+ * CommandError is a function to return error codes for commands for TCL
+ */
+func CommandError(i *Interpreter, argv []string, pd interface{}) (string, error) {
 	if len(argv) != 1 && len(argv) != 2 {
-		return "", arityErr(i, argv[0], argv)
+		return "", incorrectArgCountError(i, argv[0], argv)
 	}
 	return "", fmt.Errorf(argv[1])
 }
 
-// CommandPuts is a function to print strings for TCL
-func CommandPuts(i *Interp, argv []string, pd interface{}) (string, error) {
+/*
+ * CommandPuts is a function to print strings for TCL
+ */
+func CommandPuts(i *Interpreter, argv []string, pd interface{}) (string, error) {
 	if len(argv) != 2 {
 		return "", fmt.Errorf("wrong number of args for %s %s", argv[0], argv)
 	}
@@ -241,8 +270,10 @@ func CommandPuts(i *Interp, argv []string, pd interface{}) (string, error) {
 	return "", nil
 }
 
-// RegisterCoreCommands is a callable to register TCL commands.
-func (i *Interp) RegisterCoreCommands() {
+/*
+ * RegisterCoreCommands is a callable to register TCL commands.
+ */
+func (i *Interpreter) RegisterCoreCommands() {
 	name := [...]string{"+", "-", "*", "/", ">", ">=", "<", "<=", "==", "!="}
 	for _, n := range name {
 		_ = i.RegisterCommand(n, CommandMath, nil)

@@ -1,10 +1,10 @@
 package main
 
 import (
-	fmt "fmt"
 	log "log"
 	http "net/http"
 	os "os"
+	strconv "strconv"
 	sync "sync"
 
 	autorestart "github.com/slayer/autorestart"
@@ -290,7 +290,7 @@ func init() {
 	if config.MonitorPort != 0 {
 		go func() {
 			log.Printf("[INFO] Starting Prometheus metrics exporter on port %d\n", config.MonitorPort)
-			log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%d", config.ListenAddr, config.MonitorPort), nil))
+			log.Fatal(http.ListenAndServe(string(config.ListenAddr)+strconv.FormatInt(config.MonitorPort, 10), nil))
 		}()
 	}
 }
