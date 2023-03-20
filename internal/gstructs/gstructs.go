@@ -1,6 +1,8 @@
 package gstructs
 
-// GagentConfig is the primary construct used by all modes
+/*
+ * GagentConfig is the primary construct used by all modes
+ */
 type GagentConfig struct {
 	Name        string           `hcl:"name,optional"`
 	Mode        string           `hcl:"mode,attr"`

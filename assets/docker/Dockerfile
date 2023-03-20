@@ -1,4 +1,4 @@
-FROM dragonheim/golang:1.20 as builder
+FROM nikatjef/golang:1.20 as builder
 ARG SEMVER=${SEMVER:-0.0.7}
 
 WORKDIR /gagent

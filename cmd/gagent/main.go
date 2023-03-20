@@ -52,19 +52,27 @@ var environment struct {
 	UUID string `env:"GAGENT_UUID" envDefault:""`
 }
 
-// This is the application version number. It can be overridden at build time
-// using the -ldflags "-X main.semVER=0.0.1" option.
+/*
+ * This is the application version number. It can be overridden at build time
+ * using the -ldflags "-X main.semVER=0.0.1" option.
+ */
 var semVER = "0.0.6"
 
-// This is the application configuration. It is populated from the configuration
-// file and then used throughout the application.
+/*
+ * This is the application configuration. It is populated from the configuration
+ * file and then used throughout the application.
+ */
 var config gstructs.GagentConfig
 
-// We use a WaitGroup to wait for all goroutines to finish before exiting.
+/*
+ * We use a WaitGroup to wait for all goroutines to finish before exiting.
+ */
 var wg sync.WaitGroup
 
-// This is the main function, and it assumes that the configuration file has
-// already been read and parsed by the init() function.
+/*
+ * This is the main function, and it assumes that the configuration file has
+ * already been read and parsed by the init() function.
+ */
 func main() {
 	log.Printf("[DEBUG] Configuration is %v\n", config)
 
@@ -117,11 +125,12 @@ func main() {
 	os.Exit(0)
 }
 
-// This is the init() function. It is called before the main() function, and
-// it reads the configuration file, parses the command line arguments, and
-// reads the environment variables. It also sets up the logging.
+/*
+ * This is the init() function. It is called before the main() function, and
+ * it reads the configuration file, parses the command line arguments, and
+ * reads the environment variables. It also sets up the logging.
+ */
 func init() {
-	// var err error
 	autorestart.StartWatcher()
 
 	cfg := environment

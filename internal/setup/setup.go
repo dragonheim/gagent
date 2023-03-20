@@ -12,8 +12,8 @@ import (
 )
 
 /*
-Main is the entrypoint for the setup process
-*/
+ * Main is the entrypoint for the setup process
+ */
 func Main(wg *sync.WaitGroup, config gs.GagentConfig) {
 	log.Printf("[INFO] Starting setup\n")
 	defer wg.Done()
@@ -31,13 +31,15 @@ func Main(wg *sync.WaitGroup, config gs.GagentConfig) {
 
 	clientBlock1 := rootBody.AppendNewBlock("client", []string{config.Name})
 	clientBody1 := clientBlock1.Body()
-	// clientBody1.AppendUnstructuredTokens(
-	// 	hclwrite.TokensForTraversal(hcl.Traversal{
-	// 		hcl.TraverseRoot{
-	// 			Name: hcl.CommentGenerator("comment"),
-	// 		},
-	// 	},
-	// 	))
+	/*
+	 * clientBody1.AppendUnstructuredTokens(
+	 * 	hclwrite.TokensForTraversal(hcl.Traversal{
+	 * 		hcl.TraverseRoot{
+	 * 			Name: hcl.CommentGenerator("comment"),
+	 * 		},
+	 * 	},
+	 * 	))
+	 */
 	clientBody1.SetAttributeValue("clientid", cty.StringVal(config.UUID))
 	rootBody.AppendNewline()
 

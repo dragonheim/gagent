@@ -4,8 +4,8 @@
 ARG VARIANT="1.20"
 FROM mcr.microsoft.com/vscode/devcontainers/go:0-${VARIANT}
 
-COPY --from=aquasec/trivy:0.32.1 /usr/local/bin/trivy /usr/bin/trivy
-COPY --from=securego/gosec:2.13.1 /bin/gosec /usr/bin/gosec
+COPY --from=aquasec/trivy:0.38.3 /usr/local/bin/trivy /usr/bin/trivy
+COPY --from=securego/gosec:2.15.0 /bin/gosec /usr/bin/gosec
 
 # [Choice] Node.js version: none, lts/*, 16, 14, 12, 10
 ARG NODE_VERSION="none"

@@ -18,13 +18,13 @@ import (
 )
 
 /*
-Client mode will send an agent file to a router for processing
-Clients do not process the agent files, only send them as
-requests to a router. If started without arguments, the client
-will contact the router and attempt to retrieve the results
-of it's most recent request.
-Main is the entrypoint for the client process
-*/
+ * Client mode will send an agent file to a router for processing
+ * Clients do not process the agent files, only send them as
+ * requests to a router. If started without arguments, the client
+ * will contact the router and attempt to retrieve the results
+ * of it's most recent request.
+ * Main is the entrypoint for the client process
+ */
 func Main(wg *sync.WaitGroup, config gstructs.GagentConfig) {
 	log.Printf("[INFO] Starting client\n")
 	defer wg.Done()
@@ -102,7 +102,6 @@ func sendAgent(wg *sync.WaitGroup, uuid string, connectString string, agent gstr
 	status, err := sock.SendMessage(agent)
 	if err != nil {
 		log.Printf("[ERROR] Failed to send agent to router\n")
-		// os.Exit(11)
 		return
 	}
 	log.Printf("[DEBUG] Agent send status: %d\n", status)

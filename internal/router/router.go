@@ -24,13 +24,13 @@ var (
 )
 
 /*
-The 'router' processes routing requests from the agent.  The router does
-not handle any of the agent activities beyond processing the agent's
-list of tags and passing the agent and it's storage to either a member
-or client node. Tags are used by the agent to give hints as to where
-it should be routed.
-Main is the entrypoint for the router
-*/
+ * The 'router' processes routing requests from the agent.  The router does
+ * not handle any of the agent activities beyond processing the agent's
+ * list of tags and passing the agent and it's storage to either a member
+ * or client node. Tags are used by the agent to give hints as to where
+ * it should be routed.
+ * Main is the entrypoint for the router
+ */
 func Main(wg *sync.WaitGroup, config gstructs.GagentConfig) {
 	log.Printf("[INFO] Starting router\n")
 	defer wg.Done()
@@ -139,7 +139,9 @@ func unwrap(msg []string) (head string, tail []string) {
 func answerClient(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		opsProcessed.Inc()
-		// fmt.Fprintf(w, "%v\n", r)
+		/*
+		 * fmt.Fprintf(w, "%v\n", r)
+		 */
 		http.NotFound(w, r)
 		return
 	}
