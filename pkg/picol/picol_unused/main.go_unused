@@ -12,20 +12,10 @@ import (
 
 var fname = flag.String("f", "", "file name")
 
-// CommandPuts is a simple version of the TCL puts function.
-func CommandPuts(i *picol.Interpreter, argv []string, pd interface{}) (string, error) {
-	if len(argv) != 2 {
-		return "", fmt.Errorf("wrong number of args for %s %s", argv[0], argv)
-	}
-	fmt.Println(argv[1])
-	return "", nil
-}
-
 func main() {
 	flag.Parse()
 	interp := picol.NewInterpreter()
 	interp.RegisterCoreCommands()
-	interp.RegisterCommand("puts", CommandPuts, nil)
 
 	buf, err := ioutil.ReadFile(*fname)
 	if err == nil {

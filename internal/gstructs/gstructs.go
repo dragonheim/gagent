@@ -8,11 +8,11 @@ type GagentConfig struct {
 	Mode        string           `hcl:"mode,attr"`
 	UUID        string           `hcl:"uuid,optional"`
 	ListenAddr  string           `hcl:"listenaddr,optional"`
-	MonitorPort int64            `hcl:"monitorport,optional"`
-	ClientPort  int64            `hcl:"clientport,optional"`
-	RouterPort  int64            `hcl:"routerport,optional"`
-	WorkerPort  int64            `hcl:"workerport,optional"`
 	ChainDBPath string           `hcl:"chaindbpath,optional"`
+	MonitorPort int              `hcl:"monitorport,optional"`
+	ClientPort  int              `hcl:"clientport,optional"`
+	RouterPort  int              `hcl:"routerport,optional"`
+	WorkerPort  int              `hcl:"workerport,optional"`
 	Clients     []*ClientDetails `hcl:"client,block"`
 	Routers     []*RouterDetails `hcl:"router,block"`
 	Workers     []*WorkerDetails `hcl:"worker,block"`
@@ -63,26 +63,26 @@ type RouterDetails struct {
 	RouterAddr string `hcl:"address,attr"`
 
 	/*
-	 * G'Agent client will use this port to communicate with the routers.
-	 */
-	ClientPort int64 `hcl:"clientport,optional"`
-
-	/*
-	 * G'Agent router will use this port to communicate with other routers.
-	 */
-	RouterPort int64 `hcl:"routerport,optional"`
-
-	/*
-	 * G'Agent worker will use this port to communicate with the routers.
-	 */
-	WorkerPort int64 `hcl:"workerport,optional"`
-
-	/*
 	 * These tags will be passed to the router upon connection. The router
 	 * will then use these tags to help determine which worker / client to
 	 * send the client's requests and results to.
 	 */
 	RouterTags []string `hcl:"tags,optional"`
+
+	/*
+	 * G'Agent client will use this port to communicate with the routers.
+	 */
+	ClientPort int `hcl:"clientport,optional"`
+
+	/*
+	 * G'Agent router will use this port to communicate with other routers.
+	 */
+	RouterPort int `hcl:"routerport,optional"`
+
+	/*
+	 * G'Agent worker will use this port to communicate with the routers.
+	 */
+	WorkerPort int `hcl:"workerport,optional"`
 }
 
 /*
@@ -111,8 +111,8 @@ type WorkerDetails struct {
 
 type AgentDetails struct {
 	Client     string `hcl:"client"`
-	Status     int64  `hcl:"status"`
 	Shasum     string `hcl:"shasum"`
+	Status     int    `hcl:"status"`
 	Hints      []string
 	ScriptCode []byte
 	Answer     []byte

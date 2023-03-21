@@ -1,5 +1,5 @@
 FROM nikatjef/golang:1.20 as builder
-ARG SEMVER=${SEMVER:-0.0.7}
+ARG SEMVER=${SEMVER:-0.0.8}
 
 WORKDIR /gagent
 COPY . .

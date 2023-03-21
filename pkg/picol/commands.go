@@ -1,6 +1,7 @@
 package picol
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -92,8 +93,8 @@ func CommandMath(i *Interpreter, argv []string, pd interface{}) (string, error) 
 		if a != b {
 			c = 1
 		}
-	default: // FIXME I hate warnings
-		c = 0
+	default:
+		return "0", errors.New("invalid operator " + argv[0])
 	}
 	return fmt.Sprintf("%d", c), nil
 }

@@ -4,6 +4,7 @@ import (
 	fmt "fmt"
 	log "log"
 	http "net/http"
+	strconv "strconv"
 	sync "sync"
 
 	gcdb "github.com/dragonheim/gagent/internal/chaindb"
@@ -44,7 +45,7 @@ func Main(wg *sync.WaitGroup, config gstructs.GagentConfig) {
 
 	db.Init()
 
-	workerListener := fmt.Sprintf("tcp://%s:%d", config.ListenAddr, config.WorkerPort)
+	workerListener := "tcp://" + config.ListenAddr + ":" + strconv.Itoa(config.WorkerPort)
 	_ = workerSock.Bind(workerListener)
 
 	workers := make([]string, 0)
@@ -112,7 +113,7 @@ func createClientListener(wg *sync.WaitGroup, config gstructs.GagentConfig) {
 	clientSock, _ := zmq.NewSocket(zmq.ROUTER)
 	defer clientSock.Close()
 
-	clientListener := fmt.Sprintf("tcp://%s:%d", config.ListenAddr, config.ClientPort)
+	clientListener := "tcp://" + config.ListenAddr + ":" + strconv.Itoa(config.ClientPort)
 	log.Printf("[DEBUG] Binding to: %s", clientListener)
 	_ = clientSock.Bind(clientListener)
 

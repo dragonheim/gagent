@@ -8,7 +8,7 @@ import (
 	gstructs "github.com/dragonheim/gagent/internal/gstructs"
 
 	/*
-	 * picol "github.com/dragonheim/gagent/src/picol"
+	 * picol "github.com/dragonheim/gagent/pkg/picol"
 	 */
 
 	prometheus "github.com/prometheus/client_golang/prometheus"
@@ -43,13 +43,13 @@ func Main(wg *sync.WaitGroup, config gstructs.GagentConfig) {
 		/*
 		 * Generate connect string for this router.
 		 */
-		connectString := "tcp://" + config.Routers[key].RouterAddr + ":" + strconv.FormatInt(rport, 10)
+		connectString := "tcp://" + config.Routers[key].RouterAddr + ":" + strconv.Itoa(rport)
 
 		wg.Add(1)
 		go getAgent(wg, config.UUID, connectString)
 	}
 	/*
-	 * workerListener := "tcp://" + config.ListenAddr + ":" + strconv.FormatInt(config.WorkerPort, 10)
+	 * workerListener := "tcp://" + config.ListenAddr + ":" + strconv.Itoa(config.WorkerPort)
 	 */
 
 }

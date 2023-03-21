@@ -5,6 +5,7 @@ import (
 	"unicode/utf8"
 )
 
+// Define parser token types
 const (
 	ptESC = iota
 	ptSTR
@@ -15,6 +16,7 @@ const (
 	ptEOF
 )
 
+// parserStruct represents the parser state
 type parserStruct struct {
 	text              string
 	p, start, end, ln int
@@ -22,26 +24,31 @@ type parserStruct struct {
 	Type              int
 }
 
+// initParser initializes a new parserStruct instance
 func initParser(text string) *parserStruct {
-	return &parserStruct{text, 0, 0, 0, len(text), 0, ptEOL}
+	return &parserStruct{text: text, ln: len(text), Type: ptEOL}
 }
 
+// next advances the parser position by one rune
 func (p *parserStruct) next() {
 	_, w := utf8.DecodeRuneInString(p.text[p.p:])
 	p.p += w
 	p.ln -= w
 }
 
+// current returns the current rune at the parser position
 func (p *parserStruct) current() rune {
 	r, _ := utf8.DecodeRuneInString(p.text[p.p:])
 	return r
 }
 
+// token returns the current token text between start and end positions
 func (p *parserStruct) token() (t string) {
 	defer recover()
 	return p.text[p.start:p.end]
 }
 
+// parseSep parses whitespace separators
 func (p *parserStruct) parseSep() string {
 	p.start = p.p
 	for ; p.p < len(p.text); p.next() {
@@ -54,6 +61,7 @@ func (p *parserStruct) parseSep() string {
 	return p.token()
 }
 
+// parseEol parses end of line and comments
 func (p *parserStruct) parseEol() string {
 	p.start = p.p
 
@@ -70,6 +78,7 @@ func (p *parserStruct) parseEol() string {
 	return p.token()
 }
 
+// parseCommand parses a command within brackets
 func (p *parserStruct) parseCommand() string {
 	level, blevel := 1, 0
 	p.next() // skip
@@ -103,6 +112,7 @@ Loop:
 	return p.token()
 }
 
+// parseVar parses a variable reference
 func (p *parserStruct) parseVar() string {
 	p.next() // skip the $
 	p.start = p.p
@@ -132,6 +142,7 @@ func (p *parserStruct) parseVar() string {
 	return p.token()
 }
 
+// parseBrace parses a brace-enclosed string
 func (p *parserStruct) parseBrace() string {
 	level := 1
 	p.next() // skip
@@ -160,6 +171,7 @@ Loop:
 	return p.token()
 }
 
+// parseString parses a string with or without quotes
 func (p *parserStruct) parseString() string {
 	newword := p.Type == ptSEP || p.Type == ptEOL || p.Type == ptSTR
 
@@ -203,6 +215,7 @@ Loop:
 	return p.token()
 }
 
+// parseComment skips over comment text
 func (p *parserStruct) parseComment() string {
 	for p.ln != 0 && p.current() != '\n' {
 		p.next()
@@ -210,6 +223,7 @@ func (p *parserStruct) parseComment() string {
 	return p.token()
 }
 
+// GetToken returns the next token from the parser
 func (p *parserStruct) GetToken() string {
 	for {
 		if p.ln == 0 {
@@ -246,5 +260,4 @@ func (p *parserStruct) GetToken() string {
 			return p.parseString()
 		}
 	}
-	/*	return p.token() /* unreached */
 }

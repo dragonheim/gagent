@@ -56,7 +56,7 @@ var environment struct {
  * This is the application version number. It can be overridden at build time
  * using the -ldflags "-X main.semVER=0.0.1" option.
  */
-var semVER = "0.0.6"
+var semVER = "0.0.8"
 
 /*
  * This is the application configuration. It is populated from the configuration
@@ -290,7 +290,7 @@ func init() {
 	if config.MonitorPort != 0 {
 		go func() {
 			log.Printf("[INFO] Starting Prometheus metrics exporter on port %d\n", config.MonitorPort)
-			log.Fatal(http.ListenAndServe(string(config.ListenAddr)+strconv.FormatInt(config.MonitorPort, 10), nil))
+			log.Fatal(http.ListenAndServe(string(config.ListenAddr)+strconv.Itoa(config.MonitorPort), nil))
 		}()
 	}
 }
