@@ -45,7 +45,7 @@ func Main(wg *sync.WaitGroup, config gstructs.GagentConfig) {
 
 	chain := gcdb.NewGagentDb()
 	log.Println("[DEBUG] Loading chaindb ")
-	err := chain.LoadHCL()
+	err := chain.LoadHCL(config.ChainDBPath)
 	if err != nil {
 		log.Printf("[ERROR] Error loading chaindb: %s", err)
 	}

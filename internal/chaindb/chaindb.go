@@ -38,8 +38,8 @@ func NewGagentDb() *GagentDb {
 /*
  * Load the database from disk
  */
-func (db *GagentDb) LoadHCL() error {
-	err := hclsimple.DecodeFile("chaindb.hcl", nil, db)
+func (db *GagentDb) LoadHCL(ChainDBPath string) error {
+	err := hclsimple.DecodeFile(ChainDBPath, nil, db)
 	if err != nil {
 		return err
 	}

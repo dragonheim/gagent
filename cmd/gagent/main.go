@@ -290,7 +290,7 @@ func init() {
 	if config.MonitorPort != 0 {
 		go func() {
 			log.Printf("[INFO] Starting Prometheus metrics exporter on port %d\n", config.MonitorPort)
-			log.Fatal(http.ListenAndServe(string(config.ListenAddr)+strconv.Itoa(config.MonitorPort), nil))
+			log.Fatal(http.ListenAndServe(string(config.ListenAddr)+":"+strconv.Itoa(config.MonitorPort), nil))
 		}()
 	}
 }
