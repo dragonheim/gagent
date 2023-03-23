@@ -43,7 +43,12 @@ func Main(wg *sync.WaitGroup, config gstructs.GagentConfig) {
 	workerSock, _ := zmq.NewSocket(zmq.DEALER)
 	defer workerSock.Close()
 
-	db.Init()
+	chain := gcdb.NewGagentDb()
+	log.Println("[DEBUG] Loading chaindb ")
+	err := chain.LoadHCL()
+	if err != nil {
+		log.Printf("[ERROR] Error loading chaindb: %s", err)
+	}
 
 	workerListener := "tcp://" + config.ListenAddr + ":" + strconv.Itoa(config.WorkerPort)
 	_ = workerSock.Bind(workerListener)

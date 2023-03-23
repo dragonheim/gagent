@@ -1,68 +1,101 @@
 package chaindb
 
 import (
-	sha "crypto/sha256"
+	sha256 "crypto/sha256"
 	fmt "fmt"
+	ioutil "io/ioutil"
 	log "log"
 	time "time"
 
 	gstructs "github.com/dragonheim/gagent/internal/gstructs"
+	cty "github.com/zclconf/go-cty/cty"
 
 	hclsimple "github.com/hashicorp/hcl/v2/hclsimple"
-	/*
-	 * hclwrite "github.com/hashicorp/hcl/v2/hclwrite"
-	 */)
+	hclwrite "github.com/hashicorp/hcl/v2/hclwrite"
+)
 
 type GagentDb struct {
-	chainRow []*gagentDbRow `hcl:"timestamp,block"`
+	ChainRow []*GagentDbRow `hcl:"timestamp,block"`
 }
 
-type gagentDbRow struct {
-	timestamp  time.Time             `hcl:"timestamp"`
+type GagentDbRow struct {
+	Timestamp  time.Time             `hcl:"timestamp"`
 	DBName     string                `hcl:"chainid,optional"`
 	Agent      gstructs.AgentDetails `hcl:"agent,block"`
-	dbCurrHash [32]byte              `hcl:"currhash"`
-	dbPrevHash [32]byte              `hcl:"prevhash"`
+	DbCurrHash [32]byte              `hcl:"currhash"`
+	DbPrevHash [32]byte              `hcl:"prevhash"`
 }
 
 /*
  * Initialize the database
  */
-func (db *GagentDb) Init() {
-	db.chainRow = make([]*gagentDbRow, 0)
+func NewGagentDb() *GagentDb {
+	return &GagentDb{
+		ChainRow: make([]*GagentDbRow, 0),
+	}
 }
 
 /*
  * Load the database from disk
  */
-func (db *GagentDb) Load() error {
-	err := hclsimple.DecodeFile("chaindb.hcl", nil, &db)
+func (db *GagentDb) LoadHCL() error {
+	err := hclsimple.DecodeFile("chaindb.hcl", nil, db)
+	if err != nil {
+		return err
+	}
 	log.Printf("[DEBUG] DB values: %v\n", db)
-	return err
+	return nil
+}
+
+/*
+ * Write the database to an HCL file
+ */
+func (db *GagentDb) WriteHCL() error {
+	f := hclwrite.NewEmptyFile()
+	rootBody := f.Body()
+
+	for _, row := range db.ChainRow {
+		rowBlock := rootBody.AppendNewBlock("row", []string{})
+		rowBody := rowBlock.Body()
+
+		rowBody.SetAttributeValue("timestamp", cty.StringVal(row.Timestamp.Format(time.RFC3339)))
+		rowBody.SetAttributeValue("chainid", cty.StringVal(row.DBName))
+		rowBody.SetAttributeValue("currhash", cty.StringVal(fmt.Sprintf("%x", row.DbCurrHash)))
+		rowBody.SetAttributeValue("prevhash", cty.StringVal(fmt.Sprintf("%x", row.DbPrevHash)))
+
+		agentBlock := rowBody.AppendNewBlock("agent", []string{})
+		agentBody := agentBlock.Body()
+		agentBody.SetAttributeValue("name", cty.StringVal(row.Agent.Client))
+		agentBody.SetAttributeValue("version", cty.StringVal(row.Agent.Shasum))
+	}
+
+	return ioutil.WriteFile("chaindb_out.hcl", f.Bytes(), 0644)
 }
 
 /*
  * Add a new row to the chaindb
  */
-func (db *GagentDb) AddRow(row *gagentDbRow) error {
-	row.timestamp = time.Now()
-	db.chainRow = append(db.chainRow, row)
-
-	return nil
+func (db *GagentDb) AddRow(row *GagentDbRow) {
+	row.Timestamp = time.Now()
+	db.ChainRow = append(db.ChainRow, row)
+	db.SetCurrHash()
+	db.SetPrevHash()
 }
 
 /*
  * Set current hash of the database
  */
 func (db *GagentDb) SetCurrHash() {
-	db.chainRow[len(db.chainRow)-1].dbCurrHash = [32]byte{}
-	foo := sha.Sum256([]byte(fmt.Sprintf("%v", db)))
-	db.chainRow[len(db.chainRow)-1].dbCurrHash = foo
+	row := db.ChainRow[len(db.ChainRow)-1]
+	row.DbCurrHash = sha256.Sum256([]byte(fmt.Sprintf("%v", db)))
 }
 
 /*
  * Set previous hash of the database
  */
 func (db *GagentDb) SetPrevHash() {
-	db.chainRow[len(db.chainRow)-1].dbPrevHash = db.chainRow[len(db.chainRow)-1].dbCurrHash
+	row := db.ChainRow[len(db.ChainRow)-1]
+	if len(db.ChainRow) > 1 {
+		row.DbPrevHash = db.ChainRow[len(db.ChainRow)-2].DbCurrHash
+	}
 }
