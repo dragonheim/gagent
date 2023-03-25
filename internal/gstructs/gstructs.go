@@ -18,6 +18,7 @@ type GagentConfig struct {
 	Workers     []*WorkerDetails `hcl:"worker,block"`
 	Version     string
 	File        string
+	Agent       string
 	CMode       bool
 }
 

@@ -4,7 +4,6 @@ import (
 	log "log"
 	http "net/http"
 	os "os"
-	strconv "strconv"
 	sync "sync"
 
 	autorestart "github.com/slayer/autorestart"
@@ -56,7 +55,7 @@ var environment struct {
  * This is the application version number. It can be overridden at build time
  * using the -ldflags "-X main.semVER=0.0.1" option.
  */
-var semVER = "0.0.8"
+var semVER = "0.0.9"
 
 /*
  * This is the application configuration. It is populated from the configuration
@@ -131,8 +130,6 @@ func main() {
  * reads the environment variables. It also sets up the logging.
  */
 func init() {
-	autorestart.StartWatcher()
-
 	cfg := environment
 	if err := env.Parse(&cfg); err != nil {
 		log.Printf("%+v\n", err)
@@ -261,7 +258,7 @@ func init() {
 				log.Printf("[ERROR] Agent file not specified")
 				os.Exit(8)
 			} else {
-				config.File = opts["--agent"].(string)
+				config.Agent = opts["--agent"].(string)
 			}
 
 			if opts["pull"] == true {
@@ -287,10 +284,13 @@ func init() {
 	/*
 	 * Start Prometheus metrics exporter
 	 */
-	if config.MonitorPort != 0 {
-		go func() {
-			log.Printf("[INFO] Starting Prometheus metrics exporter on port %d\n", config.MonitorPort)
-			log.Fatal(http.ListenAndServe(string(config.ListenAddr)+":"+strconv.Itoa(config.MonitorPort), nil))
-		}()
-	}
+	// if config.MonitorPort != 0 {
+	// 	go func() {
+	// 		log.Printf("[INFO] Starting Prometheus metrics exporter on port %d\n", config.MonitorPort)
+	// 		log.Fatal(http.ListenAndServe(string(config.ListenAddr)+":"+strconv.Itoa(config.MonitorPort), nil))
+	// 	}()
+	// }
+	autorestart.WatchFilename = config.File
+	autorestart.StartWatcher()
+
 }

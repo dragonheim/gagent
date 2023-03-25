@@ -10,17 +10,10 @@ import (
 	gcdb "github.com/dragonheim/gagent/internal/chaindb"
 	gstructs "github.com/dragonheim/gagent/internal/gstructs"
 
-	prometheus "github.com/prometheus/client_golang/prometheus"
-	promauto "github.com/prometheus/client_golang/prometheus/promauto"
-
 	zmq "github.com/pebbe/zmq4"
 )
 
 var (
-	opsProcessed = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "client_requests_received",
-	})
-
 	db gcdb.GagentDb
 )
 
@@ -144,7 +137,6 @@ func unwrap(msg []string) (head string, tail []string) {
 
 func answerClient(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
-		opsProcessed.Inc()
 		/*
 		 * fmt.Fprintf(w, "%v\n", r)
 		 */

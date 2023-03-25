@@ -8,6 +8,7 @@ import (
 	log "log"
 	os "os"
 	regexp "regexp"
+	strconv "strconv"
 	strings "strings"
 	sync "sync"
 	time "time"
@@ -33,9 +34,9 @@ func Main(wg *sync.WaitGroup, config gstructs.GagentConfig) {
 	var err error
 
 	if config.CMode {
-		agent.ScriptCode, err = ioutil.ReadFile(config.File)
+		agent.ScriptCode, err = ioutil.ReadFile(config.Agent)
 		if err != nil {
-			log.Printf("[ERROR] No such file or directory: %s", config.File)
+			log.Printf("[ERROR] No such file or directory: %s", config.Agent)
 			os.Exit(4)
 		}
 		log.Printf("[DEBUG] Agent file contents: \n----- -----\n%s\n----- -----\n", agent.ScriptCode)
@@ -56,7 +57,7 @@ func Main(wg *sync.WaitGroup, config gstructs.GagentConfig) {
 		if config.Routers[key].ClientPort != 0 {
 			rport = config.Routers[key].ClientPort
 		}
-		connectString := fmt.Sprintf("tcp://%s:%d", config.Routers[key].RouterAddr, rport)
+		connectString := "tcp://" + config.Routers[key].RouterAddr + ":" + strconv.Itoa(rport)
 
 		wg.Add(1)
 		go sendAgent(wg, config.UUID, connectString, agent)
