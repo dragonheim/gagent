@@ -122,7 +122,6 @@ func createClientListener(wg *sync.WaitGroup, config gstructs.GagentConfig) {
 		}
 		log.Printf("[DEBUG] Client message received: %s", msg)
 	}
-
 }
 
 func unwrap(msg []string) (head string, tail []string) {
@@ -137,9 +136,6 @@ func unwrap(msg []string) (head string, tail []string) {
 
 func answerClient(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
-		/*
-		 * fmt.Fprintf(w, "%v\n", r)
-		 */
 		http.NotFound(w, r)
 		return
 	}
@@ -152,18 +148,21 @@ func answerClient(w http.ResponseWriter, r *http.Request) {
 	 * Handle GET requests
 	 */
 	case http.MethodGet:
+		log.Println("[DEBUG] GET method received")
 		fmt.Fprintf(w, "%v\n", r)
 
 	/*
 	 * Handle POST requests
 	 */
 	case http.MethodPost:
+		log.Println("[DEBUG] POST method received")
 		fmt.Fprintf(w, "%v\n", r)
 
 	/*
 	 * Handle PUT requests
 	 */
 	case http.MethodOptions:
+		log.Println("[DEBUG] PUT method received")
 		w.Header().Set("Allow", "GET, POST, OPTIONS")
 		w.WriteHeader(http.StatusNoContent)
 

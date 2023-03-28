@@ -69,13 +69,21 @@ func Main(wg *sync.WaitGroup, config gstructs.GagentConfig) {
  */
 func getTagsFromHints(agent gstructs.AgentDetails) []string {
 	var tags []string
-	re := regexp.MustCompile(`\s*set\s+GHINT\s*\[\s*split\s*"(?P<Hints>.+)"\s*\,\s*\]`)
+
+	// Use named capture groups to extract the hints
+	re := regexp.MustCompile(`^*set\s+GHINT\s*\[\s*split\s*"(?P<Hints>[^"]+)"\s*,\s*\]`)
 	res := re.FindStringSubmatch(string(agent.ScriptCode))
-	if len(res) < 1 {
+
+	// If we don't have at least 2 matches, we have no hints
+	if len(res) < 2 {
 		log.Printf("[ERROR] Agent is missing GHINT tags")
 		os.Exit(4)
 	}
-	tags = strings.Split(res[1], ",")
+
+	// Use named capturing group index
+	hintsIndex := re.SubexpIndex("Hints")
+	tags = strings.Split(res[hintsIndex], ",")
+
 	log.Printf("[DEBUG] G'Agent hints: %v\n", tags)
 
 	return tags

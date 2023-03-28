@@ -50,7 +50,7 @@ func (db *GagentDb) LoadHCL(ChainDBPath string) error {
 /*
  * Write the database to an HCL file
  */
-func (db *GagentDb) WriteHCL() error {
+func (db *GagentDb) WriteHCL(ChainDBPath string) error {
 	f := hclwrite.NewEmptyFile()
 	rootBody := f.Body()
 
@@ -69,7 +69,7 @@ func (db *GagentDb) WriteHCL() error {
 		agentBody.SetAttributeValue("version", cty.StringVal(row.Agent.Shasum))
 	}
 
-	return ioutil.WriteFile("chaindb_out.hcl", f.Bytes(), 0600)
+	return ioutil.WriteFile(ChainDBPath, f.Bytes(), 0600)
 }
 
 /*
