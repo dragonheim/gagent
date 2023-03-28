@@ -69,7 +69,7 @@ func (db *GagentDb) WriteHCL() error {
 		agentBody.SetAttributeValue("version", cty.StringVal(row.Agent.Shasum))
 	}
 
-	return ioutil.WriteFile("chaindb_out.hcl", f.Bytes(), 0644)
+	return ioutil.WriteFile("chaindb_out.hcl", f.Bytes(), 0600)
 }
 
 /*
