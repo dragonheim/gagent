@@ -116,5 +116,4 @@ func sendAgent(wg *sync.WaitGroup, uuid string, connectString string, agent gstr
 	log.Printf("[DEBUG] Agent send status: %d\n", status)
 	mu.Unlock()
 	time.Sleep(10 * time.Second)
-
 }
