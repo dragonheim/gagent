@@ -147,12 +147,12 @@ func (interp *Interpreter) Eval(script string) (string, error) {
 			 * TODO: escape handling missing!
 			 */
 		case ptSEP:
-			prevType = parser.Type
+			// prevType = parser.Type
 			continue
 		}
 
 		if parser.Type == ptEOL {
-			prevType = parser.Type
+			// prevType = parser.Type
 			if len(argv) != 0 {
 				cmd := interp.Command(argv[0])
 				if cmd == nil {
@@ -178,7 +178,7 @@ func (interp *Interpreter) Eval(script string) (string, error) {
 		} else { // Interpolation
 			argv[len(argv)-1] = strings.Join([]string{argv[len(argv)-1], token}, "")
 		}
-		prevType = parser.Type
+		// prevType = parser.Type
 	}
 	return result, nil
 }
