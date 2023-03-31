@@ -49,7 +49,7 @@ mode = "router"
 
 /*
  * This is the port to G'Agent will listen for on
- * for Prometheus queries. It defaults to 9101.
+ * for Prometheus queries. Can be overriden by MONITOR_PORT environment variable
  * Monitoring will be disabled if this is set to 0.
  *
  * Optional.

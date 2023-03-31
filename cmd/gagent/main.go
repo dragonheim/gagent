@@ -4,6 +4,7 @@ import (
 	log "log"
 	http "net/http"
 	os "os"
+	strconv "strconv"
 	sync "sync"
 
 	autorestart "github.com/slayer/autorestart"
@@ -46,9 +47,9 @@ import (
  */
 
 var environment struct {
-	Mode string `env:"GAGENT_MODE" envDefault:"setup"`
-	Port int    `env:"PORT" envDefault:"3000"`
-	UUID string `env:"GAGENT_UUID" envDefault:""`
+	ConfigFile  string `env:"GAGENT_CONFIG" envDefault:"/etc/gagent/gagent.hcl"`
+	Mode        string `env:"GAGENT_MODE" envDefault:"setup"`
+	MonitorPort int    `env:"MONITOR_PORT" envDefault:"0"`
 }
 
 /*
@@ -151,7 +152,7 @@ func init() {
 	 */
 	config.Version = semVER
 
-	config.File = "/etc/gagent/gagent.hcl"
+	config.File = cfg.ConfigFile
 
 	config.Mode = "setup"
 
@@ -173,7 +174,7 @@ func init() {
 	 * G'Agent will use this port for monitoring via prometheus., If set
 	 * is set to 0, G'Agent will not listen for prometheus metrics.
 	 */
-	config.MonitorPort = 9101
+	config.MonitorPort = cfg.MonitorPort
 
 	/*
 	 * G'Agent client will use this port to communicate with the routers.
@@ -229,6 +230,20 @@ func init() {
 	usage += "  --agent=<file>    -- filename of the agent to be uploaded to the G'Agent network. Required in push mode\n"
 	usage += "\n"
 
+	usage += "Environment Variables:\n"
+	usage += "  GAGENT_CONFIG     -- [default: /etc/gagent/gagent.hcl]\n"
+	usage += "  GAGENT_MONITOR    -- [default: 0]\n"
+	usage += "  MODE              -- [default: setup]\n"
+	usage += "\n"
+
+	usage += "Examples:\n"
+	usage += "  gagent client pull --config=/etc/gagent/gagent.hcl\n"
+	usage += "  gagent client push --config=/etc/gagent/gagent.hcl --agent=/tmp/agent.tcl\n"
+	usage += "  gagent router --config=/etc/gagent/gagent.hcl\n"
+	usage += "  gagent worker --config=/etc/gagent/gagent.hcl\n"
+	usage += "  gagent setup --config=/etc/gagent/gagent.hcl\n"
+	usage += "\n"
+
 	/*
 	 * Consume the usage variable and the command line arguments to create a
 	 * dictionary / map.
@@ -279,17 +294,15 @@ func init() {
 		}
 	}
 
-	log.Printf("[DEBUG] Config is %v\n", config)
-
 	/*
 	 * Start Prometheus metrics exporter
 	 */
-	// if config.MonitorPort != 0 {
-	// 	go func() {
-	// 		log.Printf("[INFO] Starting Prometheus metrics exporter on port %d\n", config.MonitorPort)
-	// 		log.Fatal(http.ListenAndServe(string(config.ListenAddr)+":"+strconv.Itoa(config.MonitorPort), nil))
-	// 	}()
-	// }
+	if config.MonitorPort != 0 {
+		go func() {
+			log.Printf("[INFO] Starting Prometheus metrics exporter on port %d\n", config.MonitorPort)
+			log.Fatal(http.ListenAndServe(string(config.ListenAddr)+":"+strconv.Itoa(config.MonitorPort), nil))
+		}()
+	}
 	autorestart.WatchFilename = config.File
 	autorestart.StartWatcher()
 

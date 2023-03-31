@@ -105,15 +105,23 @@ LOOP:
 /*
  * Create listener for client requests
  */
-func createClientListener(wg *sync.WaitGroup, config gstructs.GagentConfig) {
+func createClientListener(wg *sync.WaitGroup, config gstructs.GagentConfig) error {
 	defer wg.Done()
 
-	clientSock, _ := zmq.NewSocket(zmq.ROUTER)
+	clientSock, err := zmq.NewSocket(zmq.ROUTER)
+	if err != nil {
+		log.Printf("[ERROR] Error creating client socket: %s", err)
+		return err
+	}
 	defer clientSock.Close()
 
 	clientListener := "tcp://" + config.ListenAddr + ":" + strconv.Itoa(config.ClientPort)
 	log.Printf("[DEBUG] Binding to: %s", clientListener)
-	_ = clientSock.Bind(clientListener)
+	err = clientSock.Bind(clientListener)
+	if err != nil {
+		log.Printf("[ERROR] Error binding client socket: %s", err)
+		return err
+	}
 
 	for {
 		msg, err := clientSock.RecvMessage(0)
@@ -122,6 +130,7 @@ func createClientListener(wg *sync.WaitGroup, config gstructs.GagentConfig) {
 		}
 		log.Printf("[DEBUG] Client message received: %s", msg)
 	}
+	return nil
 }
 
 func unwrap(msg []string) (head string, tail []string) {

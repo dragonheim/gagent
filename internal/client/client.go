@@ -34,15 +34,15 @@ func Main(wg *sync.WaitGroup, config gstructs.GagentConfig) {
 	var err error
 
 	if config.CMode {
-		agent.ScriptCode, err = ioutil.ReadFile(config.Agent)
+		agent.Script, err = ioutil.ReadFile(config.Agent)
 		if err != nil {
 			log.Printf("[ERROR] No such file or directory: %s", config.Agent)
 			os.Exit(4)
 		}
-		log.Printf("[DEBUG] Agent file contents: \n----- -----\n%s\n----- -----\n", agent.ScriptCode)
+		log.Printf("[DEBUG] Agent file contents: \n----- -----\n%s\n----- -----\n", agent.Script)
 	}
 	agent.Client = config.UUID
-	tmpsum := sha.Sum256([]byte(agent.ScriptCode))
+	tmpsum := sha.Sum256([]byte(agent.Script))
 	agent.Shasum = fmt.Sprintf("%v", hex.EncodeToString(tmpsum[:]))
 	log.Printf("[INFO] SHA256 of Agent file: %s", agent.Shasum)
 	agent.Status = 1
@@ -72,7 +72,7 @@ func getTagsFromHints(agent gstructs.AgentDetails) []string {
 
 	// Use named capture groups to extract the hints
 	re := regexp.MustCompile(`^*set\s+GHINT\s*\[\s*split\s*"(?P<Hints>[^"]+)"\s*,\s*\]`)
-	res := re.FindStringSubmatch(string(agent.ScriptCode))
+	res := re.FindStringSubmatch(string(agent.Script))
 
 	// If we don't have at least 2 matches, we have no hints
 	if len(res) < 2 {
@@ -108,6 +108,7 @@ func sendAgent(wg *sync.WaitGroup, uuid string, connectString string, agent gstr
 	}
 
 	log.Printf("[DEBUG] Start sending agent...\n")
+	agent.Status = 2
 	status, err := sock.SendMessage(agent)
 	if err != nil {
 		log.Printf("[ERROR] Failed to send agent to router\n")
