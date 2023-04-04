@@ -125,33 +125,33 @@ func (interp *Interpreter) Eval(script string) (string, error) {
 	for {
 		prevType := parser.Type
 		token := parser.GetToken()
-		if parser.Type == ptEOF {
+		if parser.Type == ParserTokenEOF {
 			break
 		}
 
 		switch parser.Type {
-		case ptVAR:
+		case ParserTokenVAR:
 			v, ok := interp.Variable(token)
 			if !ok {
 				return "", fmt.Errorf("no such variable '%s'", token)
 			}
 			token = string(v)
-		case ptCMD:
+		case ParserTokenCMD:
 			result, err = interp.Eval(token)
 			if err != nil {
 				return result, err
 			}
 			token = result
-		case ptESC:
+		case ParserTokenESC:
 			/*
 			 * TODO: escape handling missing!
 			 */
-		case ptSEP:
+		case ParserTokenSEP:
 			// prevType = parser.Type
 			continue
 		}
 
-		if parser.Type == ptEOL {
+		if parser.Type == ParserTokenEOL {
 			// prevType = parser.Type
 			if len(argv) != 0 {
 				cmd := interp.Command(argv[0])
@@ -173,7 +173,7 @@ func (interp *Interpreter) Eval(script string) (string, error) {
 		/*
 		 * We have a new token, append to the previous or as new arg?
 		 */
-		if prevType == ptSEP || prevType == ptEOL {
+		if prevType == ParserTokenSEP || prevType == ParserTokenEOL {
 			argv = append(argv, token)
 		} else { // Interpolation
 			argv[len(argv)-1] = strings.Join([]string{argv[len(argv)-1], token}, "")

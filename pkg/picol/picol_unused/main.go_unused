@@ -12,16 +12,15 @@ import (
 
 var fname = flag.String("f", "", "file name")
 
-func main() {
-	flag.Parse()
+func RunPicol(fname string) error {
 	interp := picol.NewInterpreter()
 	interp.RegisterCoreCommands()
 
-	buf, err := ioutil.ReadFile(*fname)
+	buf, err := ioutil.ReadFile(fname)
 	if err == nil {
 		result, err := interp.Eval(string(buf))
 		if err != nil {
-			fmt.Println("ERRROR", result, err)
+			return fmt.Errorf("Error: %s, Result: %s", err, result)
 		}
 	} else {
 		for {
@@ -30,8 +29,17 @@ func main() {
 			clibuf, _ := scanner.ReadString('\n')
 			result, err := interp.Eval(clibuf[:len(clibuf)-1])
 			if len(result) != 0 {
-				fmt.Println("ERRROR", result, err)
+				return fmt.Errorf("Error: %s, Result: %s", err, result)
 			}
 		}
+	}
+	return nil
+}
+
+func main() {
+	flag.Parse()
+	err := RunPicol(*fname)
+	if err != nil {
+		fmt.Println(err)
 	}
 }

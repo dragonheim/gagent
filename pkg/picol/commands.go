@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"testing"
 )
 
 /*
@@ -18,36 +17,15 @@ func incorrectArgCountError(i *Interpreter, name string, argv []string) error {
 }
 
 /*
- * needleInHaystack returns true if the string is in a slice
+ * NeedleInHaystack returns true if the string is in a slice
  */
-func needleInHaystack(needle string, haystack []string) bool {
+func NeedleInHaystack(needle string, haystack []string) bool {
 	for _, haystackMember := range haystack {
 		if haystackMember == needle {
 			return true
 		}
 	}
 	return false
-}
-
-/*
- * Test_needleInHaystack tests the return value of needleInHaystack
- */
-func Test_needleInHaystack(t *testing.T) {
-	var haystack = []string{"a", "b", "c"}
-	var needle = "a"
-	if !needleInHaystack(needle, haystack) {
-		t.Errorf("%s not in %s", needle, haystack)
-	}
-
-	needle = "j"
-	if needleInHaystack(needle, haystack) {
-		t.Errorf("%s in %s", needle, haystack)
-	}
-
-	needle = "ab"
-	if needleInHaystack(needle, haystack) {
-		t.Errorf("%s in %s", needle, haystack)
-	}
 }
 
 /*
@@ -274,7 +252,7 @@ func CommandPuts(i *Interpreter, argv []string, pd interface{}) (string, error) 
 /*
  * RegisterCoreCommands is a callable to register TCL commands.
  */
-func (i *Interpreter) RegisterCoreCommands() {
+func (i *Interpreter) RegisterCoreCommands() error {
 	name := [...]string{"+", "-", "*", "/", ">", ">=", "<", "<=", "==", "!="}
 	for _, n := range name {
 		_ = i.RegisterCommand(n, CommandMath, nil)
@@ -289,4 +267,6 @@ func (i *Interpreter) RegisterCoreCommands() {
 	_ = i.RegisterCommand("return", CommandReturn, nil)
 	_ = i.RegisterCommand("error", CommandError, nil)
 	_ = i.RegisterCommand("puts", CommandPuts, nil)
+
+	return nil
 }

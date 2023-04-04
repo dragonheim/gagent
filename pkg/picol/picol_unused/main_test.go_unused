@@ -1,0 +1,31 @@
+package main_test
+
+import (
+	"io/ioutil"
+	"os"
+	"testing"
+
+	picol "github.com/dragonheim/gagent/pkg/picol/picol_unused"
+)
+
+func Test_RunPicol(t *testing.T) {
+	// Create a temporary test file
+	content := []byte("set a 5\nset b 7\n+ $a $b\n")
+	tmpfile, err := ioutil.TempFile("", "picol_test")
+	if err != nil {
+		t.Fatalf("Error creating temporary test file: %v", err)
+	}
+	defer os.Remove(tmpfile.Name()) // clean up
+
+	if _, err := tmpfile.Write(content); err != nil {
+		t.Fatalf("Error writing content to temporary test file: %v", err)
+	}
+	if err := tmpfile.Close(); err != nil {
+		t.Fatalf("Error closing temporary test file: %v", err)
+	}
+
+	err = picol.RunPicol(tmpfile.Name())
+	if err != nil {
+		t.Errorf("Error during RunPicol: %v", err)
+	}
+}
