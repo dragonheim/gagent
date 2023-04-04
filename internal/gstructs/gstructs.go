@@ -111,10 +111,10 @@ type WorkerDetails struct {
 }
 
 type AgentDetails struct {
-	Status byte   `hcl:"status"`
-	Client string `hcl:"client"`
-	Shasum string `hcl:"shasum"`
-	Hints  []string
-	Script []byte
-	Answer []byte
+	Status byte     `hcl:"status"`
+	Client string   `hcl:"client"`
+	Shasum string   `hcl:"shasum"`
+	Hints  []string `hcl:"hints"`
+	Script []byte   `hcl:"script"`
+	Answer []byte   `hcl:"answer"`
 }
