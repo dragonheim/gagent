@@ -9,7 +9,7 @@ import (
 	gstructs "github.com/dragonheim/gagent/internal/gstructs"
 )
 
-const testChainDBPath = "test_chaindb.hcl"
+const testChainDBPath = "/tmp/test_chaindb.hcl"
 
 func TestGagentDb(t *testing.T) {
 	// Create a new GagentDb

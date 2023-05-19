@@ -66,7 +66,7 @@ func TestParser(t *testing.T) {
 			parser := picol.InitParser(tc.input)
 
 			for _, expectedType := range tc.expected {
-				token := parser.GetToken()
+				parser.GetToken()
 				if parser.Type != expectedType {
 					t.Errorf("Expected token type %d, got %d", expectedType, parser.Type)
 				}

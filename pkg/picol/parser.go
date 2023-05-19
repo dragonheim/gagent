@@ -25,7 +25,7 @@ type parserStruct struct {
 }
 
 // initParser initializes a new parserStruct instance
-func initParser(text string) *parserStruct {
+func InitParser(text string) *parserStruct {
 	return &parserStruct{text: text, ln: len(text), Type: ParserTokenEOL}
 }
 

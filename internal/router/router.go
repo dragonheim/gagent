@@ -29,7 +29,7 @@ func Main(wg *sync.WaitGroup, config gstructs.GagentConfig) {
 	log.Printf("[INFO] Starting router\n")
 	defer wg.Done()
 
-	http.HandleFunc("/hello", answerClient)
+	http.HandleFunc("/hello", AnswerClient)
 	clientSock, _ := zmq.NewSocket(zmq.ROUTER)
 	defer clientSock.Close()
 
@@ -143,7 +143,7 @@ func unwrap(msg []string) (head string, tail []string) {
 	return
 }
 
-func answerClient(w http.ResponseWriter, r *http.Request) {
+func AnswerClient(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		http.NotFound(w, r)
 		return

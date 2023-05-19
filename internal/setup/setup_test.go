@@ -41,7 +41,7 @@ func TestSetupMain(t *testing.T) {
 }
 
 func captureOutput(f func()) string {
-	original := *log.Writer()
+	original := log.Writer()
 	r, w, _ := os.Pipe()
 	log.SetOutput(w)
 

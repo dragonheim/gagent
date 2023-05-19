@@ -116,7 +116,7 @@ func (interp *Interpreter) RegisterCommand(name string, fn CommandFunc, privdata
  * Eval evaluates a script
  */
 func (interp *Interpreter) Eval(script string) (string, error) {
-	parser := initParser(script)
+	parser := InitParser(script)
 	var result string
 	var err error
 
