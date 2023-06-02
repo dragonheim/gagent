@@ -29,6 +29,8 @@ import (
 	promhttp "github.com/prometheus/client_golang/prometheus/promhttp"
 
 	uuid "github.com/jakehl/goid"
+
+	versioninfo "github.com/carlmjohnson/versioninfo"
 )
 
 /*
@@ -55,8 +57,8 @@ var environment struct {
 /*
  * This is the application version number. It can be overridden at build time
  * using the -ldflags "-X main.semVER=0.0.1" option.
+ * var semVER = "0.0.9"
  */
-var semVER = "0.0.9"
 
 /*
  * This is the application configuration. It is populated from the configuration
@@ -150,7 +152,7 @@ func init() {
 	/*
 	 * Initialize the configuration
 	 */
-	config.Version = semVER
+	config.Version = versioninfo.Version
 
 	config.File = cfg.ConfigFile
 
@@ -248,7 +250,7 @@ func init() {
 	 * Consume the usage variable and the command line arguments to create a
 	 * dictionary / map.
 	 */
-	opts, _ := docopt.ParseArgs(usage, nil, semVER)
+	opts, _ := docopt.ParseArgs(usage, nil, config.Version)
 	log.Printf("[DEBUG] Arguments are %v\n", opts)
 
 	if opts["--config"] != nil {
