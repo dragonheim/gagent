@@ -9,7 +9,8 @@ import (
 	"sync"
 	"testing"
 
-	gstructs "github.com/dragonheim/gagent/internal/gstructs"
+	gs "github.com/dragonheim/gagent/internal/gstructs"
+
 	zmq "github.com/pebbe/zmq4"
 )
 
@@ -41,7 +42,7 @@ func (m *mockSocket) Events() zmq.State                                         
 func (m *mockSocket) String() string                                             { return "" }
 
 func TestGetTagsFromHints(t *testing.T) {
-	agent := gstructs.AgentDetails{
+	agent := gs.AgentDetails{
 		Script: []byte(`*set GHINT[split "tag1,tag2,tag3",]`),
 	}
 
@@ -55,10 +56,10 @@ func TestGetTagsFromHints(t *testing.T) {
 
 func TestSendAgent(t *testing.T) {
 	wg := &sync.WaitGroup{}
-	config := gstructs.GagentConfig{
+	config := gs.GagentConfig{
 		UUID:       "test-uuid",
 		ClientPort: 1234,
-		Routers: map[string]gstructs.Router{
+		Routers: map[string]gs.Router{
 			"test-router": {
 				RouterAddr: "127.0.0.1",
 				ClientPort: 1234,
@@ -66,7 +67,7 @@ func TestSendAgent(t *testing.T) {
 		},
 	}
 
-	agent := gstructs.AgentDetails{
+	agent := gs.AgentDetails{
 		Client: "test-client",
 		Script: []byte(`*set GHINT[split "tag1,tag2,tag3",]`),
 	}
@@ -120,12 +121,12 @@ func TestMain(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	config := gstructs.GagentConfig{
+	config := gs.GagentConfig{
 		CMode:      true,
 		UUID:       "test-uuid",
 		ClientPort: 1234,
 		Agent:      tmpAgentFile.Name(),
-		Routers: map[string]gstructs.Router{
+		Routers: map[string]gs.Router{
 			"test-router": {
 				RouterAddr: "127.0.0.1",
 				ClientPort: 1234,

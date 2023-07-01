@@ -11,6 +11,7 @@ import (
 	"sync"
 
 	gs "github.com/dragonheim/gagent/internal/gstructs"
+
 	"github.com/dragonheim/gagent/internal/worker"
 )
 

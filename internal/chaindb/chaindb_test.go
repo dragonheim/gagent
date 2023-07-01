@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	gstructs "github.com/dragonheim/gagent/internal/gstructs"
+	gs "github.com/dragonheim/gagent/internal/gstructs"
 )
 
 const testChainDBPath = "/tmp/test_chaindb.hcl"
@@ -18,7 +18,7 @@ func TestGagentDb(t *testing.T) {
 	// Add a row to the database
 	row := &GagentDbRow{
 		DBName: "testDB",
-		Agent: gstructs.AgentDetails{
+		Agent: gs.AgentDetails{
 			Client: "testAgent",
 			Shasum: "v1.0.0",
 		},

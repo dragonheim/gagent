@@ -13,7 +13,7 @@ import (
 	sync "sync"
 	time "time"
 
-	gstructs "github.com/dragonheim/gagent/internal/gstructs"
+	gs "github.com/dragonheim/gagent/internal/gstructs"
 
 	zmq "github.com/pebbe/zmq4"
 )
@@ -26,11 +26,11 @@ import (
  * of it's most recent request.
  * Main is the entrypoint for the client process
  */
-func Main(wg *sync.WaitGroup, config gstructs.GagentConfig) {
+func Main(wg *sync.WaitGroup, config gs.GagentConfig) {
 	log.Printf("[INFO] Starting client\n")
 	defer wg.Done()
 
-	var agent gstructs.AgentDetails
+	var agent gs.AgentDetails
 	var err error
 
 	if config.CMode {
@@ -67,7 +67,7 @@ func Main(wg *sync.WaitGroup, config gstructs.GagentConfig) {
 /*
  * Parse Agent file for GHINT data to populate the G'Agent hints
  */
-func getTagsFromHints(agent gstructs.AgentDetails) []string {
+func getTagsFromHints(agent gs.AgentDetails) []string {
 	var tags []string
 
 	// Use named capture groups to extract the hints
@@ -89,7 +89,7 @@ func getTagsFromHints(agent gstructs.AgentDetails) []string {
 	return tags
 }
 
-func sendAgent(wg *sync.WaitGroup, uuid string, connectString string, agent gstructs.AgentDetails) {
+func sendAgent(wg *sync.WaitGroup, uuid string, connectString string, agent gs.AgentDetails) {
 	defer wg.Done()
 
 	var mu sync.Mutex

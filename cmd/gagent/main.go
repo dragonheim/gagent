@@ -50,6 +50,7 @@ import (
 
 var environment struct {
 	ConfigFile  string `env:"GAGENT_CONFIG" envDefault:"/etc/gagent/gagent.hcl"`
+	LogLevel    string `env:"GAGENT_LOGLEVEL" envDefault:"WARN"`
 	Mode        string `env:"GAGENT_MODE" envDefault:"setup"`
 	MonitorPort int    `env:"MONITOR_PORT" envDefault:"0"`
 }
@@ -134,15 +135,11 @@ func main() {
  */
 func init() {
 	cfg := environment
-	if err := env.Parse(&cfg); err != nil {
-		log.Printf("%+v\n", err)
-	}
-
-	log.Printf("%+v\n", cfg)
+	env.Parse(&cfg)
 
 	filter := &logutils.LevelFilter{
 		Levels:   []logutils.LogLevel{"DEBUG", "INFO", "WARN", "ERROR"},
-		MinLevel: logutils.LogLevel("DEBUG"),
+		MinLevel: logutils.LogLevel(cfg.LogLevel),
 		Writer:   os.Stderr,
 	}
 	log.SetOutput(filter)

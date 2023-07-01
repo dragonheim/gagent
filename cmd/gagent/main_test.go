@@ -1,11 +1,11 @@
-package main_test
+package main
 
 import (
 	"io/ioutil"
 	"os"
 	"testing"
 
-	main "github.com/dragonheim/gagent/cmd/gagent"
+	// main "github.com/dragonheim/gagent/cmd/gagent"
 	gstructs "github.com/dragonheim/gagent/internal/gstructs"
 )
 
@@ -47,7 +47,7 @@ func TestMain(t *testing.T) {
 		}
 
 		// Run the main function with the temporary config
-		main.Run(config)
+		t.Run(config)
 
 		// Check if the config has been set up correctly
 		expectedConfig := gstructs.GagentConfig{

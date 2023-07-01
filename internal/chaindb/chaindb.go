@@ -7,7 +7,8 @@ import (
 	log "log"
 	time "time"
 
-	gstructs "github.com/dragonheim/gagent/internal/gstructs"
+	gs "github.com/dragonheim/gagent/internal/gstructs"
+
 	cty "github.com/zclconf/go-cty/cty"
 
 	hclsimple "github.com/hashicorp/hcl/v2/hclsimple"
@@ -19,11 +20,11 @@ type GagentDb struct {
 }
 
 type GagentDbRow struct {
-	Timestamp  time.Time             `hcl:"timestamp"`
-	DBName     string                `hcl:"chainid,optional"`
-	Agent      gstructs.AgentDetails `hcl:"agent,block"`
-	DbCurrHash [32]byte              `hcl:"currhash"`
-	DbPrevHash [32]byte              `hcl:"prevhash"`
+	Timestamp  time.Time       `hcl:"timestamp"`
+	DBName     string          `hcl:"chainid,optional"`
+	Agent      gs.AgentDetails `hcl:"agent,block"`
+	DbCurrHash [32]byte        `hcl:"currhash"`
+	DbPrevHash [32]byte        `hcl:"prevhash"`
 }
 
 /*

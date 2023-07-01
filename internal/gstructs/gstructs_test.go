@@ -3,11 +3,11 @@ package gstructs_test
 import (
 	"testing"
 
-	"github.com/dragonheim/gagent/internal/gstructs"
+	gs "github.com/dragonheim/gagent/internal/gstructs"
 )
 
 func TestGagentConfig(t *testing.T) {
-	config := gstructs.GagentConfig{
+	config := gs.GagentConfig{
 		Name:        "test-config",
 		Mode:        "client",
 		UUID:        "test-uuid",
@@ -17,13 +17,13 @@ func TestGagentConfig(t *testing.T) {
 		ClientPort:  1234,
 		RouterPort:  5678,
 		WorkerPort:  9012,
-		Clients: []*gstructs.ClientDetails{
+		Clients: []*gs.ClientDetails{
 			{
 				ClientName: "test-client",
 				ClientID:   "client-id",
 			},
 		},
-		Routers: []*gstructs.RouterDetails{
+		Routers: []*gs.RouterDetails{
 			{
 				RouterName: "test-router",
 				RouterID:   "router-id",
@@ -34,7 +34,7 @@ func TestGagentConfig(t *testing.T) {
 				WorkerPort: 9012,
 			},
 		},
-		Workers: []*gstructs.WorkerDetails{
+		Workers: []*gs.WorkerDetails{
 			{
 				WorkerName: "test-worker",
 				WorkerID:   "worker-id",
@@ -57,7 +57,7 @@ func TestGagentConfig(t *testing.T) {
 }
 
 func TestAgentDetails(t *testing.T) {
-	agent := gstructs.AgentDetails{
+	agent := gs.AgentDetails{
 		Status: 1,
 		Client: "test-client",
 		Shasum: "123456789abcdef",

@@ -3,12 +3,12 @@ package gstructs_test
 import (
 	"testing"
 
-	"github.com/dragonheim/gagent/internal/gstructs"
+	gs "github.com/dragonheim/gagent/internal/gstructs"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGetByIndex(t *testing.T) {
-	agentStatuses := gstructs.AgentStatuses
+	agentStatuses := gs.AgentStatuses
 
 	tests := []struct {
 		index        int
@@ -34,7 +34,7 @@ func TestGetByIndex(t *testing.T) {
 }
 
 func TestGetByName(t *testing.T) {
-	agentStatuses := gstructs.AgentStatuses
+	agentStatuses := gs.AgentStatuses
 
 	tests := []struct {
 		name         string
