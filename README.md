@@ -7,6 +7,10 @@
 
 A Golang based mobile agent system loosely inspired by the [Agent Tcl / D'Agents](http://www.cs.dartmouth.edu/~dfk/agents/) system created by Robert S. Gray of Dartmouth college.
 
+Please note that this program is mostly meant to be used as a tool for me to learn software development in Go, and is not meant to be used in a production environments.
+
+GPT-4 has been used in various parts of this project to debug, improve functionality and provide examples of how to get over various hurdles as I learn Go.
+
 ## Sumary
 G'Agent streamlines interplanetary data searches using TCL scripts, allowing efficient communication despite time delays between Earth and Mars.
 
