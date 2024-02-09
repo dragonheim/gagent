@@ -1,18 +1,18 @@
 package worker_test
 
 import (
-	"bytes"
-	"io"
-	"log"
-	"os"
-	"testing"
+	bytes "bytes"
+	io "io"
+	log "log"
+	os "os"
+	testing "testing"
 
-	"strings"
-	"sync"
+	strings "strings"
+	sync "sync"
 
 	gs "github.com/dragonheim/gagent/internal/gstructs"
 
-	"github.com/dragonheim/gagent/internal/worker"
+	worker "github.com/dragonheim/gagent/internal/worker"
 )
 
 func TestWorkerMain(t *testing.T) {

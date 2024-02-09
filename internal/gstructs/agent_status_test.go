@@ -1,10 +1,10 @@
 package gstructs_test
 
 import (
-	"testing"
+	testing "testing"
 
 	gs "github.com/dragonheim/gagent/internal/gstructs"
-	"github.com/stretchr/testify/assert"
+	assert "github.com/stretchr/testify/assert"
 )
 
 func TestGetByIndex(t *testing.T) {

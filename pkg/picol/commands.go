@@ -1,10 +1,10 @@
 package picol
 
 import (
-	"errors"
-	"fmt"
-	"strconv"
-	"strings"
+	errors "errors"
+	fmt "fmt"
+	strconv "strconv"
+	strings "strings"
 )
 
 /*

@@ -1,9 +1,8 @@
 package main
 
 import (
-	"io/ioutil"
-	"os"
-	"testing"
+	os "os"
+	testing "testing"
 
 	// main "github.com/dragonheim/gagent/cmd/gagent"
 	gstructs "github.com/dragonheim/gagent/internal/gstructs"
@@ -11,7 +10,7 @@ import (
 
 // This function will create a temporary config file for testing purposes
 func createTestConfigFile() (string, error) {
-	tmpfile, err := ioutil.TempFile("", "test_config_*.hcl")
+	tmpfile, err := os.CreateTemp("", "test_config_*.hcl")
 	if err != nil {
 		return "", err
 	}

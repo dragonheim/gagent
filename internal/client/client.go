@@ -4,7 +4,6 @@ import (
 	sha "crypto/sha256"
 	hex "encoding/hex"
 	fmt "fmt"
-	ioutil "io/ioutil"
 	log "log"
 	os "os"
 	regexp "regexp"
@@ -34,7 +33,7 @@ func Main(wg *sync.WaitGroup, config gs.GagentConfig) {
 	var err error
 
 	if config.CMode {
-		agent.Script, err = ioutil.ReadFile(config.Agent)
+		agent.Script, err = os.ReadFile(config.Agent)
 		if err != nil {
 			log.Printf("[ERROR] No such file or directory: %s", config.Agent)
 			os.Exit(4)

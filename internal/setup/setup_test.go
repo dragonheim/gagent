@@ -1,17 +1,17 @@
 package setup_test
 
 import (
-	"bytes"
-	"io"
-	"log"
-	"os"
-	"testing"
+	bytes "bytes"
+	io "io"
+	log "log"
+	os "os"
+	testing "testing"
 
-	"strings"
-	"sync"
+	strings "strings"
+	sync "sync"
 
 	gs "github.com/dragonheim/gagent/internal/gstructs"
-	"github.com/dragonheim/gagent/internal/setup"
+	setup "github.com/dragonheim/gagent/internal/setup"
 )
 
 func TestSetupMain(t *testing.T) {

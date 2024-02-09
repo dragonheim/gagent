@@ -1,7 +1,7 @@
 package gstructs
 
 import (
-	"fmt"
+	fmt "fmt"
 )
 
 type AgentStatus []string

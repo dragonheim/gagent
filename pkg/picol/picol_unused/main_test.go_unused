@@ -1,9 +1,9 @@
 package main_test
 
 import (
-	"io/ioutil"
-	"os"
-	"testing"
+	io "io"
+	os "os"
+	testing "testing"
 
 	picol "github.com/dragonheim/gagent/pkg/picol/picol_unused"
 )
@@ -11,7 +11,7 @@ import (
 func Test_RunPicol(t *testing.T) {
 	// Create a temporary test file
 	content := []byte("set a 5\nset b 7\n+ $a $b\n")
-	tmpfile, err := ioutil.TempFile("", "picol_test")
+	tmpfile, err := io.TempFile("", "picol_test")
 	if err != nil {
 		t.Fatalf("Error creating temporary test file: %v", err)
 	}

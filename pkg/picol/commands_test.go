@@ -1,9 +1,9 @@
 package picol_test
 
 import (
-	"testing"
+	testing "testing"
 
-	"github.com/dragonheim/gagent/pkg/picol"
+	picol "github.com/dragonheim/gagent/pkg/picol"
 )
 
 func Test_NeedleInHaystack(t *testing.T) {

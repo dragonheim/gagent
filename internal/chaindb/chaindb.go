@@ -3,8 +3,8 @@ package chaindb
 import (
 	sha256 "crypto/sha256"
 	fmt "fmt"
-	ioutil "io/ioutil"
 	log "log"
+	os "os"
 	time "time"
 
 	gs "github.com/dragonheim/gagent/internal/gstructs"
@@ -70,7 +70,7 @@ func (db *GagentDb) WriteHCL(ChainDBPath string) error {
 		agentBody.SetAttributeValue("version", cty.StringVal(row.Agent.Shasum))
 	}
 
-	return ioutil.WriteFile(ChainDBPath, f.Bytes(), 0600)
+	return os.WriteFile(ChainDBPath, f.Bytes(), 0600)
 }
 
 /*

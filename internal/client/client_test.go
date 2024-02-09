@@ -1,13 +1,13 @@
 package client
 
 import (
-	"bytes"
-	"errors"
-	"io/ioutil"
-	"log"
-	"os"
-	"sync"
-	"testing"
+	bytes "bytes"
+	errors "errors"
+	io "io"
+	log "log"
+	os "os"
+	sync "sync"
+	testing "testing"
 
 	gs "github.com/dragonheim/gagent/internal/gstructs"
 
@@ -107,7 +107,7 @@ func equalStringSlices(a, b []string) bool {
 
 func TestMain(t *testing.T) {
 	// Prepare a temporary agent file for testing
-	tmpAgentFile, err := ioutil.TempFile("", "agent")
+	tmpAgentFile, err := io.TempFile("", "agent")
 	if err != nil {
 		t.Fatal(err)
 	}

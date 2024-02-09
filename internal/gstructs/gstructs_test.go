@@ -1,7 +1,7 @@
 package gstructs_test
 
 import (
-	"testing"
+	testing "testing"
 
 	gs "github.com/dragonheim/gagent/internal/gstructs"
 )

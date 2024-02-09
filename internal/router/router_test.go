@@ -1,14 +1,14 @@
 package router_test
 
 import (
-	"net/http"
-	"net/http/httptest"
-	"sync"
-	"testing"
-	"time"
+	http "net/http"
+	httptest "net/http/httptest"
+	sync "sync"
+	testing "testing"
+	time "time"
 
 	gs "github.com/dragonheim/gagent/internal/gstructs"
-	"github.com/dragonheim/gagent/internal/router"
+	router "github.com/dragonheim/gagent/internal/router"
 )
 
 func TestRouterMain(t *testing.T) {

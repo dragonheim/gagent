@@ -1,10 +1,10 @@
 package chaindb
 
 import (
-	"bytes"
-	"os"
-	"testing"
-	"time"
+	bytes "bytes"
+	os "os"
+	testing "testing"
+	time "time"
 
 	gs "github.com/dragonheim/gagent/internal/gstructs"
 )
