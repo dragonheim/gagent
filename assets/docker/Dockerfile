@@ -1,5 +1,5 @@
-FROM dragonheim/golang:1.20 as builder
-ARG SEMVER=${SEMVER:-0.0.9}
+FROM dragonheim/golang:1.22 as builder
+ARG SEMVER=${SEMVER:-0.0.11}
 
 WORKDIR /gagent
 COPY . .
@@ -12,7 +12,7 @@ RUN apk add --no-cache zeromq-dev build-base git
 RUN go build -o /gagent/bin/gagent -ldflags "-X main.semVER=${SEMVER}" cmd/gagent/main.go
 RUN strip /gagent/bin/gagent
 
-FROM alpine:3.17
+FROM alpine:3.19
 ARG SEMVER
 LABEL Name="G'Agent"
 LABEL Maintainer="jwells@dragonheim.net"
