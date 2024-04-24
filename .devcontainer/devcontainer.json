@@ -8,7 +8,7 @@
 			// Update the VARIANT arg to pick a version of Go: 1, 1.16, 1.17
 			// Append -bullseye or -buster to pin to an OS version.
 			// Use -bullseye variants on local arm64/Apple Silicon.
-			"VARIANT": "1.20-bullseye",
+			"VARIANT": "1.22-bookworm",
 			// Options
 			"NODE_VERSION": "none"
 		}
@@ -23,14 +23,18 @@
 		"go.goroot": "/usr/local/go"
 	},
 	
-	// Add the IDs of extensions you want installed when the container is created.
+	// Use the same extensions we had on Gitpod plus HCL support.
 	"extensions": [
+		"editorconfig.editorconfig",
+		"dbaeumer.vscode-eslint",
 		"golang.Go",
-		"GitHub.copilot",
-		"GitHub.vscode-pull-request-github",
-		"wholroyd.hcl",
+		"stylelint.vscode-stylelint",
+		"DavidAnson.vscode-markdownlint",
+		"Vue.volar",
+		"ms-azuretools.vscode-docker",
+		"vitest.explorer",
     		"GitHub.vscode-pull-request-github",
-    		"hashicorp.terraform"
+		"wholroyd.hcl"
 	],
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
@@ -40,16 +44,20 @@
 	// Use 'portsAttributes' to set default properties for specific forwarded ports. More info: https://code.visualstudio.com/docs/remote/devcontainerjson-reference.
 	"portsAttributes": {
 		"9101": {
-			"label": "Prometheus"
+			"label": "Prometheus",
+			"onAutoForward": "notify"
 		},
 		"35570": {
-			"label": "Router To Router"
+			"label": "Router To Router",
+			"onAutoForward": "notify"
 		},
 		"35571": {
-			"label": "Worker To Router"
+			"label": "Worker To Router",
+			"onAutoForward": "notify"
 		},
 		"35572": {
-			"label": "Client To Router"
+			"label": "Client To Router",
+			"onAutoForward": "notify"
 		}
 	},
 
