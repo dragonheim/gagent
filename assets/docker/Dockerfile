@@ -12,7 +12,7 @@ RUN apk add --no-cache zeromq-dev build-base git
 RUN go build -o /gagent/bin/gagent -ldflags "-X main.semVER=${SEMVER}" cmd/gagent/main.go
 RUN strip /gagent/bin/gagent
 
-FROM alpine:3.19
+FROM alpine:3.20
 ARG SEMVER
 LABEL Name="G'Agent"
 LABEL Maintainer="jwells@dragonheim.net"
