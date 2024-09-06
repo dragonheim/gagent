@@ -1,0 +1,13 @@
+name: Build G'Agent
+on: [push]
+jobs:
+  trivy_scan:
+    runs-on: docker
+    container:
+      image: dragonheim/golang:latest
+    steps:
+      - run: ls -la
+      - run: go version
+      - run: go fmt
+      # - run: apk add --no-cache git zeromq-dev build-base
+      # - run: go build -o test cmd/gagent/main.go
