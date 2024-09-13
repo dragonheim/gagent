@@ -27,7 +27,7 @@
  *
  * Required.
  */
-mode = "router"
+mode = "client"
 
 /*
  * @TODO: Add authentication based on UUID

@@ -1,6 +1,7 @@
 package main
 
 import (
+	flag "flag"
 	log "log"
 	http "net/http"
 	os "os"
@@ -54,12 +55,6 @@ var environment struct {
 	Mode        string `env:"GAGENT_MODE" envDefault:"setup"`
 	MonitorPort int    `env:"MONITOR_PORT" envDefault:"0"`
 }
-
-/*
- * This is the application version number. It can be overridden at build time
- * using the -ldflags "-X main.semVER=0.0.1" option.
- * var semVER = "0.0.9"
- */
 
 /*
  * This is the application configuration. It is populated from the configuration
@@ -134,6 +129,8 @@ func main() {
  * reads the environment variables. It also sets up the logging.
  */
 func init() {
+	versioninfo.AddFlag(nil)
+	flag.Parse()
 	cfg := environment
 	env.Parse(&cfg)
 
@@ -223,8 +220,8 @@ func init() {
 	usage += "\n"
 
 	usage += "Options:\n"
-	usage += "  -h --help         -- Show this help screen and exit\n"
-	usage += "  --version         -- Show version and exit\n"
+	usage += "  -h, --help        -- Show this help screen and exit\n"
+	usage += "  -v, -version      -- Show version and exit\n"
 	usage += "  --config=<config> -- [default: /etc/gagent/gagent.hcl]\n"
 	usage += "  --agent=<file>    -- filename of the agent to be uploaded to the G'Agent network. Required in push mode\n"
 	usage += "\n"

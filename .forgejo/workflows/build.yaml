@@ -1,13 +1,33 @@
-name: Build G'Agent
+name: G'Agent Scan, Build, and Test
 on: [push]
 jobs:
-  trivy_scan:
+  scan:
     runs-on: docker
     container:
       image: dragonheim/golang:latest
     steps:
-      - run: ls -la
-      - run: go version
-      - run: go fmt
-      # - run: apk add --no-cache git zeromq-dev build-base
-      # - run: go build -o test cmd/gagent/main.go
+      - run: apk add --no-cache nodejs npm
+      - uses: actions/checkout@v4
+      - run: curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+      - run: curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s -- -b /usr/local/bin
+      - run: /usr/local/bin/trivy fs --no-progress --severity CRITICAL --exit-code 1 .
+      - run: /usr/local/bin/gosec -quiet ./...
+  
+  build:
+    needs: scan
+    runs-on: docker
+    container:
+      image: dragonheim/golang:latest
+    steps:
+      - run: apk add --no-cache zeromq-dev build-base git
+      - run: apk add --no-cache nodejs npm
+
+      - uses: actions/checkout@v4
+
+      - run: go build -o gagent cmd/gagent/main.go
+      - run: ./gagent --version
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: gagent
+          path: gagent
