@@ -1,5 +1,5 @@
 name: G'Agent Scan, Build, and Test
-on: [push]
+# on: [push]
 jobs:
   scan:
     runs-on: docker
