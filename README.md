@@ -5,7 +5,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/dragonheim/gagent)](https://goreportcard.com/report/github.com/dragonheim/gagent)
 [![Docker Pulls](https://img.shields.io/docker/pulls/dragonheim/gagent)](https://hub.docker.com/r/dragonheim/gagent/tags?page=1&ordering=last_updated)
 
-A Golang based mobile agent system loosely inspired by the [Agent Tcl / D'Agents](http://www.cs.dartmouth.edu/~dfk/agents/) system created by Robert S. Gray of Dartmouth college.
+A Golang based mobile agent system loosely inspired by the [Agent Tcl / D'Agents](https://digitalcommons.dartmouth.edu/dissertations/62/) system created by Robert S. Gray of Dartmouth college.
 
 Please note that this program is mostly meant to be used as a tool for me to learn software development in Go, and is not meant to be used in production environments.
 

@@ -37,16 +37,17 @@ import (
 /*
  * Exit Codes
  *  0 Success
- *  1 Configuration file is missing or unreadable
- *  2 Setup failed
- *  3 Invalid mode of operation
- *  4 Agent file is missing or unreadable
- *  5 Agent is missing tags
- *  6 No routers defined
- *  7 No workers defined
- *  8 Agent not defined
- *  9 Agent hints / tags not defined
- * 10 Router not connected
+ *  1 Environment variable parsing failed
+ *  2 Configuration file is missing or unreadable
+ *  3 Setup failed
+ *  4 Invalid mode of operation
+ *  5 Agent file is missing or unreadable
+ *  6 Agent is missing tags
+ *  7 No routers defined
+ *  8 No workers defined
+ *  9 Agent not defined
+ * 10 Agent hints / tags not defined
+ * 11 Router not connected
  */
 
 var environment struct {
@@ -80,7 +81,7 @@ func main() {
 
 		if len(config.Routers) == 0 {
 			log.Printf("[ERROR] No routers defined.\n")
-			os.Exit(6)
+			os.Exit(7)
 		}
 
 		wg.Add(1)
@@ -116,7 +117,7 @@ func main() {
 
 	default:
 		log.Printf("[ERROR] Unknown operating mode, exiting.\n")
-		os.Exit(3)
+		os.Exit(4)
 	}
 
 	wg.Wait()
@@ -132,7 +133,11 @@ func init() {
 	versioninfo.AddFlag(nil)
 	flag.Parse()
 	cfg := environment
-	env.Parse(&cfg)
+	err := env.Parse(&cfg)
+	if err != nil {
+		log.Printf("[ERROR] Failed to parse environment variables: %s\n", err)
+		os.Exit(1)
+	}
 
 	filter := &logutils.LevelFilter{
 		Levels:   []logutils.LogLevel{"DEBUG", "INFO", "WARN", "ERROR"},
@@ -251,10 +256,10 @@ func init() {
 		config.File = opts["--config"].(string)
 	}
 
-	err := hclsimple.DecodeFile(config.File, nil, &config)
+	err = hclsimple.DecodeFile(config.File, nil, &config)
 	if err != nil && opts["setup"] == false {
 		log.Printf("[ERROR] Failed to load configuration file: %s.\n", config.File)
-		os.Exit(1)
+		os.Exit(2)
 	}
 
 	/*

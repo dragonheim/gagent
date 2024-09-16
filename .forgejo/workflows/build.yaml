@@ -1,5 +1,14 @@
 name: G'Agent Scan, Build, and Test
-# on: [push]
+on:
+  push:
+    branches:
+      - main
+      - releases/**
+    tags:
+      - v*
+
+env:
+  SEMVAR: 0.0.11
 jobs:
   scan:
     runs-on: docker
@@ -8,26 +17,56 @@ jobs:
     steps:
       - run: apk add --no-cache nodejs npm
       - uses: actions/checkout@v4
-      - run: curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
-      - run: curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s -- -b /usr/local/bin
-      - run: /usr/local/bin/trivy fs --no-progress --severity CRITICAL --exit-code 1 .
+
+      - uses: actions/cache@v4
+        with:
+          path: .cache/trivy
+          key: tmp.woDBBj4Baw
+
+      - run: /usr/local/bin/trivy fs --no-progress --severity CRITICAL --cache-dir .cache/trivy --exit-code 1 .
       - run: /usr/local/bin/gosec -quiet ./...
-  
-  build:
+
+  build_simple:
     needs: scan
     runs-on: docker
     container:
       image: dragonheim/golang:latest
     steps:
-      - run: apk add --no-cache zeromq-dev build-base git
-      - run: apk add --no-cache nodejs npm
+      - run: apk add --no-cache zeromq-dev nodejs npm
 
       - uses: actions/checkout@v4
 
-      - run: go build -o gagent cmd/gagent/main.go
-      - run: ./gagent --version
+      - run: go build -o test_artifact cmd/hello/main.go
+      - run: ./test_artifact --version
 
       - uses: actions/upload-artifact@v3
         with:
-          name: gagent
-          path: gagent
+          name: test_artifact
+          path: test_artifact
+          
+  test_simple:
+    needs: build_simple
+    runs-on: docker
+    container:
+      image: dragonheim/golang:latest
+    steps:
+      - run: apk add --no-cache nodejs npm
+      - uses: actions/download-artifact@v3
+        with:
+          name: test_artifact
+
+      - run: chmod a+x test_artifact
+      - run: ./test_artifact --version
+  
+  build_image:
+    needs: test_simple
+    runs-on: docker
+    container:
+      image: dragonheim/golang:latest
+    steps:
+      - run: apk add --no-cache zeromq-dev nodejs npm
+
+      - uses: actions/checkout@v4
+
+      - run: echo "${{ secrets.DOCKER_LOGIN }}" | docker login -u dragonheim2024 --password-stdin
+      - run: docker buildx build --push -t dragonheim/gagent:test -f assets/docker/Dockerfile --build-arg SEMVER=${{ env.SEMVAR }} .
