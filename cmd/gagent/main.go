@@ -1,6 +1,7 @@
 package main
 
 import (
+	debug "runtime/debug"
 	flag "flag"
 	log "log"
 	http "net/http"
@@ -31,7 +32,7 @@ import (
 
 	uuid "github.com/jakehl/goid"
 
-	versioninfo "github.com/carlmjohnson/versioninfo"
+	//versioninfo "github.com/carlmjohnson/versioninfo"
 )
 
 /*
@@ -130,7 +131,7 @@ func main() {
  * reads the environment variables. It also sets up the logging.
  */
 func init() {
-	versioninfo.AddFlag(nil)
+	// versioninfo.AddFlag(nil)
 	flag.Parse()
 	cfg := environment
 	err := env.Parse(&cfg)
@@ -151,7 +152,8 @@ func init() {
 	/*
 	 * Initialize the configuration
 	 */
-	config.Version = versioninfo.Version
+	config.Version, err = debug.ReadBuildInfo()
+	// config.Version = versioninfo.Version
 
 	config.File = cfg.ConfigFile
 
@@ -307,5 +309,4 @@ func init() {
 	}
 	autorestart.WatchFilename = config.File
 	autorestart.StartWatcher()
-
 }
