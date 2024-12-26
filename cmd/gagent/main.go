@@ -1,11 +1,11 @@
 package main
 
 import (
-	debug "runtime/debug"
 	flag "flag"
 	log "log"
 	http "net/http"
 	os "os"
+	debug "runtime/debug"
 	strconv "strconv"
 	sync "sync"
 
@@ -31,7 +31,6 @@ import (
 	promhttp "github.com/prometheus/client_golang/prometheus/promhttp"
 
 	uuid "github.com/jakehl/goid"
-
 	//versioninfo "github.com/carlmjohnson/versioninfo"
 )
 
@@ -152,7 +151,8 @@ func init() {
 	/*
 	 * Initialize the configuration
 	 */
-	config.Version, err = debug.ReadBuildInfo()
+	buildInfo, _ := debug.ReadBuildInfo()
+	config.Version = buildInfo.Main.Version
 	// config.Version = versioninfo.Version
 
 	config.File = cfg.ConfigFile
@@ -228,7 +228,7 @@ func init() {
 
 	usage += "Options:\n"
 	usage += "  -h, --help        -- Show this help screen and exit\n"
-	usage += "  -v, -version      -- Show version and exit\n"
+	usage += "  -v, --version     -- Show version and exit\n"
 	usage += "  --config=<config> -- [default: /etc/gagent/gagent.hcl]\n"
 	usage += "  --agent=<file>    -- filename of the agent to be uploaded to the G'Agent network. Required in push mode\n"
 	usage += "\n"
