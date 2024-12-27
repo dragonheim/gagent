@@ -8,7 +8,7 @@ on:
       - v*
 
 env:
-  SEMVAR: 0.0.11
+  SEMVAR: 0.0.13
 jobs:
   scan:
     runs-on: docker
@@ -36,7 +36,7 @@ jobs:
 
       - uses: actions/checkout@v4
 
-      - run: go build -o test_artifact cmd/gagent/main.go
+      - run: go build -o test_artifact -ldflags="-X main.Version=${{ env.SEMVAR }}" cmd/gagent/main.go
       - run: ./test_artifact --version
 
       - uses: actions/upload-artifact@v3

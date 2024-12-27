@@ -83,7 +83,7 @@ func TestInitFunction(t *testing.T) {
 	log.SetOutput(&logOutput)
 
 	// Test init
-	init()
+	// init() #@TODO Write a useful test for init
 
 	// Assertions
 	assert.Contains(t, logOutput.String(), "[DEBUG] Arguments are")

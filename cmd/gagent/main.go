@@ -1,11 +1,9 @@
 package main
 
 import (
-	flag "flag"
 	log "log"
 	http "net/http"
 	os "os"
-	debug "runtime/debug"
 	strconv "strconv"
 	sync "sync"
 
@@ -31,7 +29,6 @@ import (
 	promhttp "github.com/prometheus/client_golang/prometheus/promhttp"
 
 	uuid "github.com/jakehl/goid"
-	//versioninfo "github.com/carlmjohnson/versioninfo"
 )
 
 /*
@@ -67,6 +64,11 @@ var config gstructs.GagentConfig
  * We use a WaitGroup to wait for all goroutines to finish before exiting.
  */
 var wg sync.WaitGroup
+
+/*
+ * Set version
+ */
+var Version = "0.0.11"
 
 /*
  * This is the main function, and it assumes that the configuration file has
@@ -130,8 +132,6 @@ func main() {
  * reads the environment variables. It also sets up the logging.
  */
 func init() {
-	// versioninfo.AddFlag(nil)
-	flag.Parse()
 	cfg := environment
 	err := env.Parse(&cfg)
 	if err != nil {
@@ -151,9 +151,7 @@ func init() {
 	/*
 	 * Initialize the configuration
 	 */
-	buildInfo, _ := debug.ReadBuildInfo()
-	config.Version = buildInfo.Main.Version
-	// config.Version = versioninfo.Version
+	config.Version = Version
 
 	config.File = cfg.ConfigFile
 
