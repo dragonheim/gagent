@@ -68,7 +68,7 @@ var wg sync.WaitGroup
 /*
  * Set version
  */
-var Version = "0.0.11"
+var Version = "0.0.1"
 
 /*
  * This is the main function, and it assumes that the configuration file has

@@ -9,7 +9,7 @@ ARG GOOS=${GOOS:-linux}
 ARG CGO_ENABLED=1
 
 RUN apk add --no-cache zeromq-dev build-base git
-RUN go build -o /gagent/bin/gagent -ldflags "-X main.semVER=${SEMVER}" cmd/gagent/main.go
+RUN go build -o /gagent/bin/gagent -ldflags "-X main.Version=${SEMVER}" cmd/gagent/main.go
 RUN strip /gagent/bin/gagent
 
 FROM alpine:3.20
