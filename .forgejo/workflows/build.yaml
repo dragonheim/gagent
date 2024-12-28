@@ -15,7 +15,8 @@ jobs:
     container:
       image: dragonheim/golang:latest
     steps:
-      - run: apk add --no-cache zeromq-dev nodejs npm
+      - run: apk add --no-cache curl gpg zeromq-dev nodejs npm
+      - run: curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s
       - uses: actions/checkout@v4
 
       - uses: actions/cache@v4
