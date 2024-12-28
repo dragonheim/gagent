@@ -15,8 +15,7 @@ jobs:
     container:
       image: dragonheim/golang:latest
     steps:
-      - run: apk add --no-cache curl gpg zeromq-dev nodejs npm
-      - run: curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s
+      - run: apk add --no-cache zeromq-dev nodejs npm
       - uses: actions/checkout@v4
 
       - uses: actions/cache@v4
@@ -24,8 +23,8 @@ jobs:
           path: .cache/trivy
           key: tmp.woDBBj4Baw
 
-      - run: /go/bin/trivy fs --no-progress --severity CRITICAL --cache-dir .cache/trivy --exit-code 1 .
-      - run: /go/bin/gosec -exclude=G114 -quiet ./...
+      - run: trivy fs --no-progress --severity CRITICAL --cache-dir .cache/trivy --exit-code 1 .
+      - run: gosec -exclude=G114 -quiet ./...
 
   build_simple:
     needs: scan
