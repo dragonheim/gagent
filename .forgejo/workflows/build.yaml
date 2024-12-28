@@ -24,8 +24,8 @@ jobs:
           path: .cache/trivy
           key: tmp.woDBBj4Baw
 
-      - run: trivy fs --no-progress --severity CRITICAL --cache-dir .cache/trivy --exit-code 1 .
-      - run: ./bin/gosec -exclude=G114 -quiet ./...
+      - run: /go/bin/trivy fs --no-progress --severity CRITICAL --cache-dir .cache/trivy --exit-code 1 .
+      - run: /go/bin/gosec -exclude=G114 -quiet ./...
 
   build_simple:
     needs: scan
